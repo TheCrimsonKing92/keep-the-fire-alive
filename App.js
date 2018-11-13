@@ -1,7 +1,8 @@
 import React from 'react';
-import { Alert, StatusBar, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, StatusBar, StyleSheet, Text, View } from 'react-native';
 import Banner from './components/Banner';
 import Footer from './components/Footer';
+import NameSaver from './components/NameSaver'
 import TheFire from './components/TheFire';
 
 const LOG_COLOR = '#654321';
@@ -25,13 +26,7 @@ export default class App extends React.Component {
     return (
       <View style={styles.container}>
         <Banner />
-        <View style={styles.blueBlock}>
-          <Text style={{ textAlign: 'center', marginLeft: '25%', width: '50%'}}>
-            Some kind of a creepy sky type of thing
-            that really sets the mood and atmosphere
-            you know that dope type painting kinda shit.
-          </Text>
-        </View>
+        <NameSaver />
         <Text style={styles.normalText}>Open up App.js to start working on your app!</Text>
         <TheFire onPress={ this.onPressFire } />
         <Footer />
@@ -50,7 +45,6 @@ const styles = StyleSheet.create({
   blueBlock: {
     flex: 1,
     width: '100%',
-    backgroundColor: 'blue'
   },
   normalText: {
     flex: 1,
