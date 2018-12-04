@@ -47,41 +47,5 @@ const styles = StyleSheet.create({
   normalText: {
     flex: 1,
     backgroundColor: 'purple'
-  },
-  firstLog: {
-    width: 90,
-    marginLeft: 17,
-    height: 4,
-    backgroundColor: LOG_COLOR
-  },
-  secondLog: {
-    width: 100,
-      marginLeft: 12,
-      height: 4,
-      backgroundColor: LOG_COLOR
-  },
-  thirdLog: {
-    width: 110,
-      marginLeft: 7,
-      height: 4,
-      backgroundColor: LOG_COLOR
-  },
-  orangeLayer: {
-    width: 55,
-    marginLeft: 35,
-    height: 6,
-    backgroundColor: 'orange'
-  },
-  redLayer: {
-    width: 75,
-    marginLeft: 25,
-    height: 4,
-    backgroundColor: 'red'
-  },
-  yellowLayer: {
-    width: 35,
-    marginLeft: 45,
-    height: 3,
-    backgroundColor: 'yellow'
   }
 });
