@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, AsyncStorage, Button, Modal, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
+import { Alert, AsyncStorage, Button, Platform, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
 
 export default class Settings extends React.Component {
   constructor(props) {
@@ -31,7 +31,7 @@ export default class Settings extends React.Component {
 
   offerReset() {
     this.setState({
-      offerReset: true
+      offerReset: !this.state.offerReset
     });
   }
 
@@ -43,33 +43,32 @@ export default class Settings extends React.Component {
                       .catch(e => Alert.alert('Error Resetting Profile', 'Could not reset username!'));
   }
 
+  confirm() {
+    return (
+      <View>
+        <Text style={{alignSelf: 'center'}}>Profile will be reset</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+          <TouchableHighlight style={{width: '40%'}} onPress={this.cancelReset}>
+            <View style={styles.button}>
+              <Text style={styles.text}>Cancel</Text>
+            </View>
+          </TouchableHighlight>
+          <TouchableHighlight style={{width: '40%'}} onPress={this.confirmReset}>
+            <View style={styles.buttonRed}>
+              <Text style={styles.text}>Confirm</Text>
+            </View>  
+          </TouchableHighlight>
+        </View>        
+      </View>
+    )
+  }
+
   render() {
     return (
       <View style={styles.container}>
-        <Modal
-            animationType="slide"
-            transparent={false}
-            visible={this.state.offerReset}
-            onRequestClose={() => {
-              Alert.alert('Modal has been closed.');
-            }}>
-            <View style={{marginTop: 22}}>
-              <View>
-                <Text>Are you sure you want to reset?</Text>
-
-                <TouchableHighlight
-                  onPress={this.confirmReset}>
-                  <Text>Yes</Text>
-                </TouchableHighlight>
-                <TouchableHighlight
-                  onPress={this.cancelReset}>
-                  <Text>No</Text>
-                </TouchableHighlight>
-              </View>
-            </View>
-          </Modal>
         <Text>Settings</Text>
-        <Button title="Reset" onPress={this.offerReset}>Reset</Button>
+        { !this.state.offerReset && <Button title="Reset Profile" onPress={this.offerReset} />}
+        { this.state.offerReset && this.confirm() }
       </View>
     )
   }
@@ -82,12 +81,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  blueBlock: {
-    flex: 1,
-    width: '100%',
+  button: Platform.select({
+    ios: {},
+    android: {
+      elevation: 4,
+      // Material design blue from https://material.google.com/style/color.html#color-color-palette
+      backgroundColor: '#2196F3',
+      borderRadius: 2,
+    },
+  }),
+  buttonRed: Platform.select({
+    ios: {},
+    android: {
+      elevation: 4,
+      backgroundColor: 'red',
+      borderRadius: 2
+    }
+  }),
+  text: {
+    textAlign: 'center',
+    padding: 8,
+    ...Platform.select({
+      ios: {
+        // iOS blue from https://developer.apple.com/ios/human-interface-guidelines/visual-design/color/
+        color: '#007AFF',
+        fontSize: 18,
+      },
+      android: {
+        color: 'white',
+        fontWeight: '500',
+      },
+    }),
   },
-  normalText: {
-    flex: 1,
-    backgroundColor: 'purple'
-  }
+  buttonDisabled: Platform.select({
+    ios: {},
+    android: {
+      elevation: 0,
+      backgroundColor: '#dfdfdf',
+    },
+  }),
+  textDisabled: Platform.select({
+    ios: {
+      color: '#cdcdcd',
+    },
+    android: {
+      color: '#a1a1a1',
+    },
+  })
 });

@@ -31,12 +31,7 @@ export default class NameSaver extends React.Component {
   render() {
     return (
       <View>
-        {
-          this.props.name === '' && this.requestName()
-        }
-        { 
-          this.props.name !== '' && this.displayName()
-        }
+        { this.props.name === '' ? this.requestName() : this.displayName() }
       </View>
     )
   }
