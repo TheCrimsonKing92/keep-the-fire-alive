@@ -1,9 +1,13 @@
 import { createBottomTabNavigator, createAppContainer } from 'react-navigation'
 
 import Home from './components/screens/Home'
+import Settings from './components/screens/Settings'
+import Skills from './components/screens/Skills'
 
 const TabNavigator = createBottomTabNavigator({
-  Home: {screen: Home}
+  Home: {screen: Home},
+  Settings: {screen: Settings},
+  Skills: {screen: Skills}
 });
 
 export default createAppContainer(TabNavigator)
