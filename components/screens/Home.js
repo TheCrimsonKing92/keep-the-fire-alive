@@ -1,28 +1,19 @@
 import React from 'react'
-import { Alert, AsyncStorage, InteractionManager, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, AsyncStorage, InteractionManager, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { NavigationEvents } from 'react-navigation'
 import Banner from '../Banner';
 import CreateProfile from './CreateProfile'
 import Footer from '../Footer';
+import GameLoop from '../GameLoop';
 import NameSaver from '../NameSaver'
+import { SAVE_KEY } from '../../Constants'
 import TheFire from '../TheFire';
 
-const SAVE_KEY = '@keep-the-fire-alive/save';
-
-export default class Home extends React.Component {
+export default class Home extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.state = {
-      lastTick: new Date(),
-      loaded: false,
-      saveTicks: 0,
-      player: {
-        hasName: false,
-        name: '',
-        counter: 0
-      }
-    }
+    this.state = this.getDefaultState();
 
     this.advance = this.advance.bind(this);
     this.loadCount = this.loadCount.bind(this);
@@ -49,6 +40,10 @@ export default class Home extends React.Component {
 
   advance() {
     this.evaluateSave();
+    this.setState({
+      ...this.state,
+      lastTick: new Date()
+    });
   }
 
   createProfile() {
@@ -61,7 +56,16 @@ export default class Home extends React.Component {
   }
 
   evaluateSave() {
+    const newTick = this.state.saveTicks + 1;
 
+    this.setState({
+      ...this.state,
+      saveTicks: newTick === this.state.settings.saveTicks ? 0 : newTick
+    });
+
+    if (newTick === this.state.settings.saveTicks) {
+      this.save();
+    }
   }
 
   async getData() {
@@ -69,18 +73,46 @@ export default class Home extends React.Component {
       loaded: false
     });
 
-    const count = await this.loadCount();
-    const username = await this.loadName();
+    const data = await this.loadSave();
+    if (data === null) {
+      this.setState({
+        ...this.getDefaultState(),
+        loaded: true
+      });
+      return;
+    }
+
+    const { count, name } = data.player;
+    const { saveTicks } = data.settings;
 
     this.setState({
       ...this.state,
       loaded: true,
       player: {
-        hasName: username !== null && username !== '',
-        name: username === null ? '' : username,
+        hasName: name !== null && name !== '',
+        name: name === null ? '' : name,
         counter: count === null ? 0 : parseInt(count)
+      },
+      settings: {
+        saveTicks
       }
     });
+  }
+
+  getDefaultState() {
+    return {
+      lastTick: new Date(),
+      loaded: false,
+      saveTicks: 0,
+      player: {
+        hasName: false,
+        name: '',
+        counter: 0
+      },
+      settings: {
+        saveTicks: 60
+      }
+    };
   }
   
   async loadCount() {
@@ -94,10 +126,18 @@ export default class Home extends React.Component {
                        .catch(e => Alert.alert('No Username', 'Could not load a username'));
   }
 
+  async loadSave() {
+    return AsyncStorage.getItem(SAVE_KEY)
+                       .then(s => JSON.parse(s))
+                       .catch(e => Alert.alert('No Save', 'Could not load save!'));
+  }
+
   loading() {
     return (
       <View style={styles.container}>
-        <Text>Loading...</Text>
+        <Banner />
+        <ActivityIndicator style={{flex: 1}}/>
+        <Text style={{flex: 1, fontSize: 20}}>Loading...</Text>
       </View>
     )
   }
@@ -148,10 +188,12 @@ export default class Home extends React.Component {
 
   async save() {
     const toSave = {
-      lastTick: new Date(),
       player: {
-        count: this.state.player.count,
+        count: this.state.player.counter,
         name: this.state.player.name
+      },
+      settings: {
+        saveTicks: this.state.settings.saveTicks
       }
     };
 
@@ -172,13 +214,29 @@ export default class Home extends React.Component {
                 .catch(e => Alert.alert('Error Saving Username', 'Could not save the username!'));
   }
 
+  updateHandler = ({ touches, screen, time }) => {
+    const fire = touches.find(t => t.type === 'fire');
+
+    if (fire) {
+      this.onPressFire();
+    }
+
+    const counter = touches.find(t => t.type === 'counter');
+
+    if (counter) {
+      this.onCounterPressed();
+    }
+
+    this.evaluateSave();
+  };
+
   render() {
     return (
-      <View style={{ height: '100%', width: '100%'}}>
+      <GameLoop style={{ height: '100%', width: '100%' }} onUpdate={this.updateHandler}>
         { !this.state.loaded && this.loading() }
         { this.state.loaded && !this.state.player.hasName && this.createProfile() }
         { this.state.loaded && this.state.player.hasName && this.normal() }
-      </View>
+      </GameLoop>
     );
   }
 };

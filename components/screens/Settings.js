@@ -1,12 +1,21 @@
 import React from 'react'
 import { Alert, AsyncStorage, Button, Platform, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
+import { SAVE_KEY } from '../../Constants';
+
+const AutoSave = (current, replace) => {
+  const buttonTitle = 'Autosave Every ' + current + ' Ticks';
+  return (
+   <Button title={buttonTitle} onPress={replace}/>
+  );
+}
 
 export default class Settings extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      offerReset: false
+      offerReset: false,
+      saveTicks: 60
     };
 
     this.cancelReset = this.cancelReset.bind(this);
@@ -36,11 +45,8 @@ export default class Settings extends React.Component {
   }
 
   async resetProgress() {
-    await AsyncStorage.removeItem('count')
-                      .catch(e => Alert.alert('Error Resetting Profile', 'Could not reset count!'));
-
-    await AsyncStorage.removeItem('username')
-                      .catch(e => Alert.alert('Error Resetting Profile', 'Could not reset username!'));
+    await AsyncStorage.removeItem(SAVE_KEY)
+                      .catch(e => Alert.alert('Error Resetting Profile', 'Could not reset profile!'));
   }
 
   confirm() {
@@ -66,8 +72,8 @@ export default class Settings extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Settings</Text>
-        { !this.state.offerReset && <Button title="Reset Profile" onPress={this.offerReset} />}
+        <Text style={{flex: 1, fontSize: 20}}>Settings</Text>
+        { !this.state.offerReset && <Button style={{flex: 1}} title="Reset Profile" onPress={this.offerReset} />}
         { this.state.offerReset && this.confirm() }
       </View>
     )
@@ -80,6 +86,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: 5,
+    paddingBottom: 5
   },
   button: Platform.select({
     ios: {},
