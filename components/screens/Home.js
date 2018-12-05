@@ -129,7 +129,7 @@ export default class Home extends React.Component {
   }
 
   onCounterPressed() {
-    const newCount = this.state.player.counter + 1;
+    const newCounter = this.state.player.counter + 1;
 
     this.setState({
       ...this.state,
@@ -139,7 +139,7 @@ export default class Home extends React.Component {
       }
     });
 
-    this.saveCount(newCount);
+    this.saveCount(newCounter);
   }
   
   onPressFire() {
