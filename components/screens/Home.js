@@ -1,5 +1,6 @@
 import React from 'react'
-import { ActivityIndicator, Alert, AsyncStorage, InteractionManager, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, AsyncStorage, StatusBar, StyleSheet, Text, View } from 'react-native';
+import Toast from 'react-native-easy-toast'
 import { NavigationEvents } from 'react-navigation'
 import Banner from '../Banner';
 import CreateProfile from './CreateProfile'
@@ -21,8 +22,6 @@ export default class Home extends React.PureComponent {
     this.onCounterPressed = this.onCounterPressed.bind(this);
     this.onNameSaved = this.onNameSaved.bind(this);
     this.onPressFire = this.onPressFire.bind(this);
-    this.saveCount = this.saveCount.bind(this);
-
   }
 
   componentDidMount() {
@@ -102,7 +101,7 @@ export default class Home extends React.PureComponent {
   async loadSave() {
     return AsyncStorage.getItem(SAVE_KEY)
                        .then(s => JSON.parse(s))
-                       .catch(e => Alert.alert('No Save', 'Could not load save!'));
+                       .catch(e => this.toast('Could not load save!'));
   }
 
   loading() {
@@ -156,7 +155,7 @@ export default class Home extends React.PureComponent {
   }
   
   onPressFire() {
-    Alert.alert('TheFire pressed', 'You pressed TheFire!')
+    this.toast('You pressed The Fire!');
   }
 
   async save() {
@@ -172,19 +171,13 @@ export default class Home extends React.PureComponent {
 
     AsyncStorage.setItem(SAVE_KEY, JSON.stringify(toSave))
                 .catch(e => {
-                  Alert.alert('Save Error', 'Could not save data!');
+                  this.toast('Could not save data!');
                   console.error(e);
                 });
   }
 
-  async saveCount(count) {
-    AsyncStorage.setItem('count', count.toString())
-                .catch(e => Alert.alert('Error Saving Count', 'Could not save the new count!'));
-  }
-
-  async saveName(name) {
-    AsyncStorage.setItem('username', name)
-                .catch(e => Alert.alert('Error Saving Username', 'Could not save the username!'));
+  toast(message) {
+    this.refs.toast.show(message);
   }
 
   updateHandler = ({ touches, screen, time }) => {
@@ -218,8 +211,9 @@ export default class Home extends React.PureComponent {
     }
     return (
       <GameLoop style={{ height: '100%', width: '100%' }} onUpdate={this.updateHandler}>
-      <NavigationEvents onWillFocus={this.getData}/>
+        <NavigationEvents onWillFocus={this.getData}/>
         { content }
+        <Toast ref="toast" position="top" positionValue={53}/>
       </GameLoop>
     );
   }
