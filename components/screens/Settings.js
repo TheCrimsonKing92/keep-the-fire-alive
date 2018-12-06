@@ -76,19 +76,19 @@ export default class Settings extends React.Component {
     let next = current;
 
     switch (next) {
-      case 60:
+      case 30:
+        next = 150;
+        break;
+      case 150:
         next = 300;
         break;
       case 300:
-        next = 600;
+        next = 900;
         break;
-      case 600:
+      case 900:
         next = 1800;
         break;
       case 1800:
-        next = 3600;
-        break;
-      case 3600:
       default:
         next = 60;
         break;

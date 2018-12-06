@@ -1,9 +1,10 @@
 import React from 'react'
-import { ActivityIndicator, AsyncStorage, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
 import Toast from 'react-native-easy-toast'
 import { NavigationEvents } from 'react-navigation'
 import Banner from '../Banner';
 import CreateProfile from './CreateProfile'
+import DataService from '../../services/DataService'
 import GameLoop from '../GameLoop';
 import NameSaver from '../NameSaver'
 import { SAVE_KEY } from '../../Constants'
@@ -101,9 +102,9 @@ export default class Home extends React.PureComponent {
   }
 
   async loadSave() {
-    return AsyncStorage.getItem(SAVE_KEY)
-                       .then(s => JSON.parse(s))
-                       .catch(e => this.toast('Could not load save!'));
+    return DataService.getData()
+                      .then(s => JSON.parse(s))
+                      .catch(e => this.toast('Could not load save!'));
   }
 
   loading() {
@@ -186,11 +187,11 @@ export default class Home extends React.PureComponent {
       }
     };
 
-    AsyncStorage.setItem(SAVE_KEY, JSON.stringify(toSave))
-                .catch(e => {
-                  this.toast('Could not save data!');
-                  console.error(e);
-                });
+    DataService.setData(toSave)
+               .catch(e => {
+                 this.toast('Could not save data!');
+                 console.error(e);
+               });
   }
 
   toast(message) {
@@ -213,7 +214,8 @@ export default class Home extends React.PureComponent {
     this.setState({
       ...this.state,
       lastTick: new Date()
-    })
+    });
+    
     this.evaluateSave();
   };
 
