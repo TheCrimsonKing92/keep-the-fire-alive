@@ -4,7 +4,6 @@ import Toast from 'react-native-easy-toast'
 import { NavigationEvents } from 'react-navigation'
 import Banner from '../Banner';
 import CreateProfile from './CreateProfile'
-import Footer from '../Footer';
 import GameLoop from '../GameLoop';
 import NameSaver from '../NameSaver'
 import { SAVE_KEY } from '../../Constants'
