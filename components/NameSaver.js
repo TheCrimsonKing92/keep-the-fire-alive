@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, TextInput, View } from 'react-native'
+import { Text, View } from 'react-native'
 import MyButton from '../components/MyButton'
 
 export default class NameSaver extends React.Component {
@@ -21,15 +21,6 @@ export default class NameSaver extends React.Component {
       </View>
     )
   }
-  requestName() {
-    return (
-      <View style={{ width: '100%' }}>
-        <Text>Enter your name</Text>
-        <TextInput placeholder="Name" onChangeText={ name => this.setState({name})}/>
-        <MyButton onPress={this.saveName} text={'Save'} />
-      </View>
-    )
-  }
 
   saveName() {
     this.props.onNameSaved(this.state.name);
@@ -38,7 +29,9 @@ export default class NameSaver extends React.Component {
   render() {
     return (
       <View>
-        { this.props.name === '' ? this.requestName() : this.displayName() }
+        <Text>Welcome, { this.props.name }</Text>
+        <MyButton onPress={this.props.onCounter} text={'Count'}/>
+        <Text>{ this.props.count } Counted</Text>
       </View>
     )
   }

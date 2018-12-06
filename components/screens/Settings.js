@@ -1,8 +1,8 @@
 import React from 'react'
-import { ActivityIndicator, Alert, Button, Platform, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import Banner from '../../components/Banner'
 import MyButton from '../../components/MyButton'
-import { clearData, getData, setData } from '../../services/DataService'
+import DataService from '../../services/DataService'
 import { NavigationEvents } from 'react-navigation'
 import Toast from 'react-native-easy-toast'
 
@@ -96,20 +96,16 @@ export default class Settings extends React.Component {
       loading: true
     });
 
-    const settings = await getData().then(JSON.parse)
-                                    .then(s => s.settings)
-                                    .catch(e => this.toast('Could not get settings with error: ' + e));
-
-    if (settings === null) {
+    try {
+      const settings = await DataService.getSettings();
+      this.setState({
+        loading: false,
+        saveTicks: settings.saveTicks
+      });
+    } catch (err) {
+      this.toast('Unhandled error getting settings: ', err);
       return;
-    }
-
-    this.setState({
-      ...this.state,
-      loading: false,
-      saveTicks: settings.saveTicks
-    });
-    
+    }    
   }
 
   Loading() {
@@ -132,8 +128,8 @@ export default class Settings extends React.Component {
   }
 
   async resetProgress() {
-    const reset = clearData().then(() => this.toast('Successfully reset profile!'))
-                             .catch(e => this.toast('Could not reset profile with error: ' + e));
+    const reset = DataService.clearData().then(() => this.toast('Successfully reset profile!'))
+                                         .catch(e => this.toast('Could not reset profile with error: ' + e));
 
     await reset;
   }
@@ -143,12 +139,6 @@ export default class Settings extends React.Component {
   }
 
   async updateSaveTicks() {
-    const current = await getData().then(JSON.stringify).catch(e => this.toast('Failed to retrieve prereq with error: ' + e));
-    if (current === null) {
-      console.error('Error state, exiting');
-      return;
-    }
-
     const next = this.getNextSaveTicks(this.state.saveTicks);
 
     this.setState({
@@ -160,27 +150,29 @@ export default class Settings extends React.Component {
     });
 
     const newData = {
-      ...current,
-      settings: {
-        ...current.settings,
-        saveTicks: next
-      }
+      saveTicks: next
     };
 
-    await setData(newData).then(() => this.toast('Successfully updated save frequency'))
-                          .catch(e => this.toast('Could not save new frequency with error: ' + e));
+    try {
+      await DataService.setSettings(newData);
+      this.toast('Successfully updated save frequency');
+    } catch (e) {
+      this.toast('Could not save new frequency');
+      console.warn(e);
+    }
 
     this.setState({
       disabled: {
         ...this.state.disabled,
         autosave: false
       }
-    });   
+    });  
   }
 
   render() {
     return (
       <View style={styles.container}>
+        <NavigationEvents onWillFocus={this.getSettings}/>
         <Banner/>
         <Text style={{alignSelf: 'center', fontSize: 20}}>Settings</Text>
         <View style={{alignItems: 'flex-start', flex: 1, padding: 5}}>

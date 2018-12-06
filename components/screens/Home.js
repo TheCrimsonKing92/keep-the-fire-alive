@@ -40,10 +40,13 @@ export default class Home extends React.PureComponent {
   }
 
   evaluateSave() {
+    if (!this.state.hasName) {
+      return;
+    }
+
     const newTick = this.state.saveTicks + 1;
 
     this.setState({
-      ...this.state,
       saveTicks: newTick === this.state.settings.saveTicks ? 0 : newTick
     });
 
@@ -58,24 +61,18 @@ export default class Home extends React.PureComponent {
     });
 
     const data = await this.loadSave();
-    if (data === null) {
-      this.setState({
-        ...this.getDefaultState(),
-        loaded: true
-      });
-      return;
-    }
 
-    const { count, name } = data.player;
+    const { count, fire, name } = data.player;
     const { saveTicks } = data.settings;
 
     this.setState({
       ...this.state,
       loaded: true,
       player: {
+        fire,
         hasName: name !== null && name !== '',
-        name: name === null ? '' : name,
-        counter: count === null ? 0 : parseInt(count)
+        name,
+        counter: parseInt(count) || 0
       },
       settings: {
         saveTicks
@@ -90,6 +87,7 @@ export default class Home extends React.PureComponent {
       saveTicks: 0,
       saving: true,
       player: {
+        fire: 10,
         hasName: false,
         name: '',
         counter: 0
@@ -101,9 +99,12 @@ export default class Home extends React.PureComponent {
   }
 
   async loadSave() {
-    return DataService.getData()
-                      .then(s => JSON.parse(s))
-                      .catch(e => this.toast('Could not load save!'));
+    try {
+      return await DataService.getData();
+    } catch (e) {
+      this.toast('Could not load save');
+      console.error('Could not load save with error: ' + e);
+    }
   }
 
   loading() {
@@ -132,15 +133,14 @@ export default class Home extends React.PureComponent {
     this.pauseAutosave();
   }
 
-  onNameSaved(name) {
+  async onNameSaved(name) {
     this.setState({
-      ...this.state,
       player: {
         ...this.state.player,
         hasName: true,
         name: name
       }
-    });
+    }, this.save);
   }
 
   onCounterPressed() {
@@ -154,8 +154,8 @@ export default class Home extends React.PureComponent {
     });
   }
 
-  onFocus() {
-    this.getData();
+  async onFocus() {
+    await this.getData();
     this.resumeAutosave();
   }
   
@@ -179,6 +179,7 @@ export default class Home extends React.PureComponent {
     const toSave = {
       player: {
         count: this.state.player.counter,
+        fire: this.state.player.fire,
         name: this.state.player.name
       },
       settings: {
@@ -189,7 +190,7 @@ export default class Home extends React.PureComponent {
     DataService.setData(toSave)
                .catch(e => {
                  this.toast('Could not save data!');
-                 console.error(e);
+                 console.error('Could not save data with error: ' + e);
                });
   }
 
@@ -198,20 +199,7 @@ export default class Home extends React.PureComponent {
   }
 
   updateHandler = ({ touches, screen, time }) => {
-    const fire = touches.find(t => t.type === 'fire');
-
-    if (fire) {
-      this.onPressFire();
-    }
-
-    const counter = touches.find(t => t.type === 'counter');
-
-    if (counter) {
-      this.onCounterPressed();
-    }
-
     this.setState({
-      ...this.state,
       lastTick: new Date()
     });
     
