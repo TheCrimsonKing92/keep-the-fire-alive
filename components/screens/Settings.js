@@ -8,8 +8,7 @@ import Toast from 'react-native-easy-toast'
 
 const AutoSave = (current, replace, disabled) => {
   const seconds = current / 60;
-  const unit = seconds > 1 ? ' Seconds' : ' Second'
-  const buttonTitle = 'Autosave Every ' + seconds + unit;
+  const buttonTitle = 'Autosave Every ' + seconds + ' Seconds';
 
   return <MyButton containerStyle={{marginTop: 5}} disabled={!!disabled} onPress={replace} text={buttonTitle}/>;
 }
@@ -24,7 +23,7 @@ export default class Settings extends React.Component {
       },
       loading: false,
       offerReset: false,
-      saveTicks: 60
+      saveTicks: 600
     };
 
     this.cancelReset = this.cancelReset.bind(this);
@@ -76,21 +75,15 @@ export default class Settings extends React.Component {
     let next = current;
 
     switch (next) {
-      case 30:
-        next = 150;
-        break;
-      case 150:
-        next = 300;
-        break;
-      case 300:
-        next = 900;
-        break;
-      case 900:
+      case 600:
         next = 1800;
         break;
       case 1800:
+        next = 3600;
+        break;
+      case 3600:
       default:
-        next = 60;
+        next = 600;
         break;
     }
 

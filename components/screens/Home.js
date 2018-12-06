@@ -7,7 +7,6 @@ import CreateProfile from './CreateProfile'
 import DataService from '../../services/DataService'
 import GameLoop from '../GameLoop';
 import NameSaver from '../NameSaver'
-import { SAVE_KEY } from '../../Constants'
 import TheFire from '../TheFire';
 
 export default class Home extends React.PureComponent {
@@ -96,7 +95,7 @@ export default class Home extends React.PureComponent {
         counter: 0
       },
       settings: {
-        saveTicks: 60
+        saveTicks: 600
       }
     };
   }
