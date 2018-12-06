@@ -2,8 +2,8 @@ import React from 'react'
 import { ActivityIndicator, Alert, Button, Platform, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
 import Banner from '../../components/Banner'
 import { clearData, getData, setData } from '../../services/DataService'
-import { lazyKeyMap } from '../../Util'
 import { NavigationEvents } from 'react-navigation'
+import Toast from 'react-native-easy-toast'
 
 const AutoSave = (current, replace) => {
   const seconds = current / 60;
@@ -32,6 +32,7 @@ export default class Settings extends React.Component {
     this.offerReset = this.offerReset.bind(this);
     this.ProfileReset = this.ProfileReset.bind(this);
     this.resetProgress = this.resetProgress.bind(this);
+    this.toast = this.toast.bind(this);
     this.updateSaveTicks = this.updateSaveTicks.bind(this);
   }
 
@@ -109,7 +110,7 @@ export default class Settings extends React.Component {
 
     const settings = await getData().then(JSON.parse)
                                     .then(s => s.settings)
-                                    .catch(e => Alert.alert('Settings Retrieval Failed', 'Could not get settings with error: ' + e));
+                                    .catch(e => this.toast('Could not get settings with error: ' + e));
 
     if (settings === null) {
       return;
@@ -147,12 +148,18 @@ export default class Settings extends React.Component {
   }
 
   async resetProgress() {
-    await clearData().then(() => Alert.alert('Profile Reset', 'Successfully reset profile!'))
-                     .catch(e => Alert.alert('Error Resetting Profile', 'Could not reset profile with error: ' + e));
+    const reset = clearData().then(() => this.toast('Successfully reset profile!'))
+                             .catch(e => this.toast('Could not reset profile with error: ' + e));
+
+    await reset;
+  }
+
+  toast(message) {
+    this.refs.toast.show(message, 4000);
   }
 
   async updateSaveTicks() {
-    const current = await getData().then(JSON.stringify).catch(e => Alert.alert('Update Failed', 'Failed to retrieve prereq with error: ' + e));
+    const current = await getData().then(JSON.stringify).catch(e => this.toast('Failed to retrieve prereq with error: ' + e));
     if (current === null) {
       console.error('Error state, exiting');
       return;
@@ -173,8 +180,8 @@ export default class Settings extends React.Component {
       }
     };
 
-    await setData(newData).then(() => Alert.alert('Updated Save Frequency', 'Succesfully updated save frequency'))
-                          .catch(e => Alert.alert('Error Updating Save Frequency', 'Could not save new frequency with error: ' + e));
+    await setData(newData).then(() => this.toast('Successfully updated save frequency'))
+                          .catch(e => this.toast('Could not save new frequency with error: ' + e));
   }
 
   render() {
@@ -186,6 +193,7 @@ export default class Settings extends React.Component {
         { !this.state.loading && AutoSave(this.state.saveTicks, this.updateSaveTicks)}
         { !this.state.loading && !this.state.offerReset && this.ProfileReset()}
         { !this.state.loading && this.state.offerReset && this.Confirm()}
+        <Toast ref="toast" position="top"/>
       </View>
     );
   }

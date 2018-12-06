@@ -15,6 +15,7 @@ export default class Home extends React.PureComponent {
 
     this.state = this.getDefaultState();
 
+    this.getData = this.getData.bind(this);
     this.loading = this.loading.bind(this);
     this.normal = this.normal.bind(this);
     this.onCounterPressed = this.onCounterPressed.bind(this);
@@ -217,6 +218,7 @@ export default class Home extends React.PureComponent {
     }
     return (
       <GameLoop style={{ height: '100%', width: '100%' }} onUpdate={this.updateHandler}>
+      <NavigationEvents onWillFocus={this.getData}/>
         { content }
       </GameLoop>
     );
