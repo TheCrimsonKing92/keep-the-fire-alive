@@ -15,8 +15,11 @@ export default class Banner extends React.PureComponent {
         <Text style={{ textAlign: 'center', backgroundColor: 'teal', fontSize: 25, fontWeight: 'bold', letterSpacing: 5, width: '100%' }} >
           Keep The Fire Alive!
         </Text>
+        <Text style={{ textAlign: 'center', backgroundColor: 'teal', fontWeight: 'bold', width: '100%'}}>
+          Copyright © 2018
+        </Text>
         <Text style={{ textAlign: 'center', backgroundColor: 'red', fontWeight: 'bold', width: '100%' }}>
-          By: TheCrimsonKing92
+          By TheCrimsonKing92
         </Text>
       </View>      
     )

@@ -123,7 +123,6 @@ export default class Home extends React.PureComponent {
             <NameSaver count={this.state.player.counter} name={this.state.player.name} onCounter={this.onCounterPressed} onNameSaved={this.onNameSaved} />
             <Text style={styles.normalText}>Open up my diiiiiiiiiiiiiiiiick!</Text>
             <TheFire onPress={ this.onPressFire } />
-            <Footer />
           </View>;
   }
 
@@ -213,7 +212,7 @@ export default class Home extends React.PureComponent {
       <GameLoop style={{ height: '100%', width: '100%' }} onUpdate={this.updateHandler}>
         <NavigationEvents onWillFocus={this.getData}/>
         { content }
-        <Toast ref="toast" position="top" positionValue={53}/>
+        <Toast ref="toast" position="bottom" positionValue={50}/>
       </GameLoop>
     );
   }
@@ -225,10 +224,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  blueBlock: {
-    flex: 1,
-    width: '100%',
   },
   normalText: {
     flex: 1,

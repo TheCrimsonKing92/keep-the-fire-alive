@@ -1,17 +1,17 @@
 import React from 'react'
 import { ActivityIndicator, Alert, Button, Platform, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
 import Banner from '../../components/Banner'
+import MyButton from '../../components/MyButton'
 import { clearData, getData, setData } from '../../services/DataService'
 import { NavigationEvents } from 'react-navigation'
 import Toast from 'react-native-easy-toast'
 
-const AutoSave = (current, replace) => {
+const AutoSave = (current, replace, disabled) => {
   const seconds = current / 60;
   const unit = seconds > 1 ? ' Seconds' : ' Second'
   const buttonTitle = 'Autosave Every ' + seconds + unit;
-  return (
-   <Button style={{ flex: 1, marginTop: 5, marginBottom: 5}} title={buttonTitle} onPress={replace}/>
-  );
+
+  return <MyButton containerStyle={{marginTop: 5}} disabled={!!disabled} onPress={replace} text={buttonTitle}/>;
 }
 
 export default class Settings extends React.Component {
@@ -19,6 +19,9 @@ export default class Settings extends React.Component {
     super(props);
 
     this.state = {
+      disabled: {
+        autosave: false
+      },
       loading: false,
       offerReset: false,
       saveTicks: 60
@@ -51,18 +54,10 @@ export default class Settings extends React.Component {
     return (
       <View style={{flex: 1, marginTop: 5}}>
         <NavigationEvents onWillFocus={this.getSettings} />
-        <Text style={{alignSelf: 'center'}}>Profile will be reset</Text>
+        <Text>Profile will be reset</Text>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-          <TouchableHighlight style={{width: '40%'}} onPress={this.cancelReset}>
-            <View style={styles.button}>
-              <Text style={styles.text}>Cancel</Text>
-            </View>
-          </TouchableHighlight>
-          <TouchableHighlight style={{width: '40%'}} onPress={this.confirmReset}>
-            <View style={styles.buttonRed}>
-              <Text style={styles.text}>Confirm</Text>
-            </View>  
-          </TouchableHighlight>
+          <MyButton containerStyle={{width: '40%'}} onPress={this.cancelReset} text={'Cancel'} />
+          <MyButton buttonStyle={{backgroundColor: 'red'}} containerStyle={{width: '40%'}} onPress={this.confirmReset} text={'Confirm'} />
         </View>        
       </View>
     )
@@ -140,11 +135,7 @@ export default class Settings extends React.Component {
   }
 
   ProfileReset() {
-    return (
-      <View style={{flex: 1, marginTop: 5}}>
-        <Button style={{flex: 1}} title="Reset Profile" onPress={this.offerReset}/>
-      </View>
-    );
+    return <MyButton containerStyle={{marginTop: 5}} onPress={this.offerReset} text={'Reset Profile'} />;
   }
 
   async resetProgress() {
@@ -168,7 +159,10 @@ export default class Settings extends React.Component {
     const next = this.getNextSaveTicks(this.state.saveTicks);
 
     this.setState({
-      ...this.state,
+      disabled: {
+        ...this.state.disabled,
+        autosave: true
+      },
       saveTicks: next
     });
 
@@ -182,18 +176,27 @@ export default class Settings extends React.Component {
 
     await setData(newData).then(() => this.toast('Successfully updated save frequency'))
                           .catch(e => this.toast('Could not save new frequency with error: ' + e));
+
+    this.setState({
+      disabled: {
+        ...this.state.disabled,
+        autosave: false
+      }
+    });   
   }
 
   render() {
     return (
       <View style={styles.container}>
         <Banner/>
-        <Text style={{flex: 1, fontSize: 20}}>Settings</Text>
-        { this.state.loading && this.Loading() }
-        { !this.state.loading && AutoSave(this.state.saveTicks, this.updateSaveTicks)}
-        { !this.state.loading && !this.state.offerReset && this.ProfileReset()}
-        { !this.state.loading && this.state.offerReset && this.Confirm()}
-        <Toast ref="toast" position="top"/>
+        <Text style={{alignSelf: 'center', fontSize: 20}}>Settings</Text>
+        <View style={{alignItems: 'flex-start', flex: 1, padding: 5}}>
+          { this.state.loading && this.Loading() }
+          { !this.state.loading && AutoSave(this.state.saveTicks, this.updateSaveTicks, this.state.disabled.autosave)}
+          { !this.state.loading && !this.state.offerReset && this.ProfileReset()}
+          { !this.state.loading && this.state.offerReset && this.Confirm()}
+        </View>        
+        <Toast ref="toast" position="bottom" positionValue={50}/>
       </View>
     );
   }
@@ -203,55 +206,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingBottom: 5
-  },
-  button: Platform.select({
-    ios: {},
-    android: {
-      elevation: 4,
-      // Material design blue from https://material.google.com/style/color.html#color-color-palette
-      backgroundColor: '#2196F3',
-      borderRadius: 2,
-    },
-  }),
-  buttonRed: Platform.select({
-    ios: {},
-    android: {
-      elevation: 4,
-      backgroundColor: 'red',
-      borderRadius: 2
-    }
-  }),
-  text: {
-    textAlign: 'center',
-    padding: 8,
-    ...Platform.select({
-      ios: {
-        // iOS blue from https://developer.apple.com/ios/human-interface-guidelines/visual-design/color/
-        color: '#007AFF',
-        fontSize: 18,
-      },
-      android: {
-        color: 'white',
-        fontWeight: '500',
-      },
-    }),
-  },
-  buttonDisabled: Platform.select({
-    ios: {},
-    android: {
-      elevation: 0,
-      backgroundColor: '#dfdfdf',
-    },
-  }),
-  textDisabled: Platform.select({
-    ios: {
-      color: '#cdcdcd',
-    },
-    android: {
-      color: '#a1a1a1',
-    },
-  })
+  }
 });
