@@ -1,11 +1,16 @@
 import React from 'react'
-import { Alert, AsyncStorage, Button, Platform, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
-import { SAVE_KEY } from '../../Constants';
+import { ActivityIndicator, Alert, Button, Platform, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
+import Banner from '../../components/Banner'
+import { clearData, getData, setData } from '../../services/DataService'
+import { lazyKeyMap } from '../../Util'
+import { NavigationEvents } from 'react-navigation'
 
 const AutoSave = (current, replace) => {
-  const buttonTitle = 'Autosave Every ' + current + ' Ticks';
+  const seconds = current / 60;
+  const unit = seconds > 1 ? ' Seconds' : ' Second'
+  const buttonTitle = 'Autosave Every ' + seconds + unit;
   return (
-   <Button title={buttonTitle} onPress={replace}/>
+   <Button style={{ flex: 1, marginTop: 5, marginBottom: 5}} title={buttonTitle} onPress={replace}/>
   );
 }
 
@@ -14,44 +19,37 @@ export default class Settings extends React.Component {
     super(props);
 
     this.state = {
+      loading: false,
       offerReset: false,
       saveTicks: 60
     };
 
     this.cancelReset = this.cancelReset.bind(this);
+    this.Confirm = this.Confirm.bind(this);
     this.confirmReset = this.confirmReset.bind(this);
+    this.getSettings = this.getSettings.bind(this);
+    this.Loading = this.Loading.bind(this);
     this.offerReset = this.offerReset.bind(this);
+    this.ProfileReset = this.ProfileReset.bind(this);
     this.resetProgress = this.resetProgress.bind(this);
+    this.updateSaveTicks = this.updateSaveTicks.bind(this);
   }
 
   cancelReset() {
     this.setState({
+      ...this.state,
       offerReset: false
     });
   }
 
-  confirmReset() {
-    this.setState({
-      offerReset: false
-    });
-
-    this.resetProgress();
+  componentDidMount() {
+    this.getSettings();
   }
 
-  offerReset() {
-    this.setState({
-      offerReset: !this.state.offerReset
-    });
-  }
-
-  async resetProgress() {
-    await AsyncStorage.removeItem(SAVE_KEY)
-                      .catch(e => Alert.alert('Error Resetting Profile', 'Could not reset profile!'));
-  }
-
-  confirm() {
+  Confirm() {
     return (
-      <View>
+      <View style={{flex: 1, marginTop: 5}}>
+        <NavigationEvents onWillFocus={this.getSettings} />
         <Text style={{alignSelf: 'center'}}>Profile will be reset</Text>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
           <TouchableHighlight style={{width: '40%'}} onPress={this.cancelReset}>
@@ -69,14 +67,127 @@ export default class Settings extends React.Component {
     )
   }
 
+  confirmReset() {
+    this.setState({
+      ...this.state,
+      offerReset: false
+    });
+
+    this.resetProgress();
+  }
+
+  getNextSaveTicks(current) {
+    let next = current;
+
+    switch (next) {
+      case 60:
+        next = 300;
+        break;
+      case 300:
+        next = 600;
+        break;
+      case 600:
+        next = 1800;
+        break;
+      case 1800:
+        next = 3600;
+        break;
+      case 3600:
+      default:
+        next = 60;
+        break;
+    }
+
+    return next;
+  }
+
+  async getSettings() {
+    this.setState({
+      ...this.state,
+      loading: true
+    });
+
+    const settings = await getData().then(JSON.parse)
+                                    .then(s => s.settings)
+                                    .catch(e => Alert.alert('Settings Retrieval Failed', 'Could not get settings with error: ' + e));
+
+    if (settings === null) {
+      return;
+    }
+
+    this.setState({
+      ...this.state,
+      loading: false,
+      saveTicks: settings.saveTicks
+    });
+    
+  }
+
+  Loading() {
+    return (
+      <View style={{flex: 1}}>
+        <ActivityIndicator size="large"/>
+        <Text style={{fontSize: 20}}>Loading...</Text>
+      </View>
+    );
+  }
+
+  offerReset() {
+    this.setState({
+      offerReset: !this.state.offerReset
+    });
+  }
+
+  ProfileReset() {
+    return (
+      <View style={{flex: 1, marginTop: 5}}>
+        <Button style={{flex: 1}} title="Reset Profile" onPress={this.offerReset}/>
+      </View>
+    );
+  }
+
+  async resetProgress() {
+    await clearData().then(() => Alert.alert('Profile Reset', 'Successfully reset profile!'))
+                     .catch(e => Alert.alert('Error Resetting Profile', 'Could not reset profile with error: ' + e));
+  }
+
+  async updateSaveTicks() {
+    const current = await getData().then(JSON.stringify).catch(e => Alert.alert('Update Failed', 'Failed to retrieve prereq with error: ' + e));
+    if (current === null) {
+      console.error('Error state, exiting');
+      return;
+    }
+
+    const next = this.getNextSaveTicks(this.state.saveTicks);
+
+    this.setState({
+      ...this.state,
+      saveTicks: next
+    });
+
+    const newData = {
+      ...current,
+      settings: {
+        ...current.settings,
+        saveTicks: next
+      }
+    };
+
+    await setData(newData).then(() => Alert.alert('Updated Save Frequency', 'Succesfully updated save frequency'))
+                          .catch(e => Alert.alert('Error Updating Save Frequency', 'Could not save new frequency with error: ' + e));
+  }
+
   render() {
     return (
       <View style={styles.container}>
+        <Banner/>
         <Text style={{flex: 1, fontSize: 20}}>Settings</Text>
-        { !this.state.offerReset && <Button style={{flex: 1}} title="Reset Profile" onPress={this.offerReset} />}
-        { this.state.offerReset && this.confirm() }
+        { this.state.loading && this.Loading() }
+        { !this.state.loading && AutoSave(this.state.saveTicks, this.updateSaveTicks)}
+        { !this.state.loading && !this.state.offerReset && this.ProfileReset()}
+        { !this.state.loading && this.state.offerReset && this.Confirm()}
       </View>
-    )
+    );
   }
 };
 
@@ -86,7 +197,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 5,
     paddingBottom: 5
   },
   button: Platform.select({

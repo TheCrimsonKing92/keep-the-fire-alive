@@ -15,9 +15,6 @@ export default class Home extends React.PureComponent {
 
     this.state = this.getDefaultState();
 
-    this.advance = this.advance.bind(this);
-    this.loadCount = this.loadCount.bind(this);
-    this.loadName = this.loadName.bind(this);
     this.loading = this.loading.bind(this);
     this.normal = this.normal.bind(this);
     this.onCounterPressed = this.onCounterPressed.bind(this);
@@ -25,25 +22,11 @@ export default class Home extends React.PureComponent {
     this.onPressFire = this.onPressFire.bind(this);
     this.saveCount = this.saveCount.bind(this);
 
-    this.handle = InteractionManager.runAfterInteractions(this.advance);
   }
 
   componentDidMount() {
     StatusBar.setHidden(true);
     this.getData();
-  }
-
-  componentWillUnmount() {
-    this.handle.cancel();
-    this.handle = null;
-  }
-
-  advance() {
-    this.evaluateSave();
-    this.setState({
-      ...this.state,
-      lastTick: new Date()
-    });
   }
 
   createProfile() {
@@ -96,7 +79,7 @@ export default class Home extends React.PureComponent {
       settings: {
         saveTicks
       }
-    });
+    });  
   }
 
   getDefaultState() {
@@ -114,17 +97,6 @@ export default class Home extends React.PureComponent {
       }
     };
   }
-  
-  async loadCount() {
-    return AsyncStorage.getItem('count')
-                       .then(s => s)
-                       .catch(e => Alert.alert('No Count', 'Could not load a count'));
-  }
-  async loadName() {
-    return AsyncStorage.getItem('username')
-                       .then(s => s)
-                       .catch(e => Alert.alert('No Username', 'Could not load a username'));
-  }
 
   async loadSave() {
     return AsyncStorage.getItem(SAVE_KEY)
@@ -136,17 +108,17 @@ export default class Home extends React.PureComponent {
     return (
       <View style={styles.container}>
         <Banner />
-        <ActivityIndicator style={{flex: 1}}/>
-        <Text style={{flex: 1, fontSize: 20}}>Loading...</Text>
+        <View style={{flex: 1}}>
+          <ActivityIndicator size="large"/>
+          <Text style={{fontSize: 20}}>Loading...</Text>
+        </View>        
       </View>
     )
   }
 
   normal() {
     return <View style={styles.container}>
-            <NavigationEvents
-              onWillFocus={() => this.getData()}
-            />
+            <NavigationEvents onWillFocus={() => this.getData()} />
             <Banner />
             <NameSaver count={this.state.player.counter} name={this.state.player.name} onCounter={this.onCounterPressed} onNameSaved={this.onNameSaved} />
             <Text style={styles.normalText}>Open up my diiiiiiiiiiiiiiiiick!</Text>
@@ -227,15 +199,25 @@ export default class Home extends React.PureComponent {
       this.onCounterPressed();
     }
 
+    this.setState({
+      ...this.state,
+      lastTick: new Date()
+    })
     this.evaluateSave();
   };
 
   render() {
+    let content;
+    if (!this.state.loaded) {
+      content = this.loading();
+    } else if (!this.state.player.hasName) {
+      content =  this.createProfile();
+    } else {
+      content = this.normal();
+    }
     return (
       <GameLoop style={{ height: '100%', width: '100%' }} onUpdate={this.updateHandler}>
-        { !this.state.loaded && this.loading() }
-        { this.state.loaded && !this.state.player.hasName && this.createProfile() }
-        { this.state.loaded && this.state.player.hasName && this.normal() }
+        { content }
       </GameLoop>
     );
   }
