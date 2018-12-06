@@ -18,7 +18,9 @@ export default class Home extends React.PureComponent {
     this.getData = this.getData.bind(this);
     this.loading = this.loading.bind(this);
     this.normal = this.normal.bind(this);
+    this.onBlur = this.onBlur.bind(this);
     this.onCounterPressed = this.onCounterPressed.bind(this);
+    this.onFocus = this.onFocus.bind(this);
     this.onNameSaved = this.onNameSaved.bind(this);
     this.onPressFire = this.onPressFire.bind(this);
   }
@@ -86,6 +88,7 @@ export default class Home extends React.PureComponent {
       lastTick: new Date(),
       loaded: false,
       saveTicks: 0,
+      saving: true,
       player: {
         hasName: false,
         name: '',
@@ -125,6 +128,10 @@ export default class Home extends React.PureComponent {
           </View>;
   }
 
+  onBlur() {
+    this.pauseAutosave();
+  }
+
   onNameSaved(name) {
     this.setState({
       ...this.state,
@@ -134,26 +141,38 @@ export default class Home extends React.PureComponent {
         name: name
       }
     });
-
-    this.saveName(name);
   }
 
   onCounterPressed() {
     const newCounter = this.state.player.counter + 1;
 
     this.setState({
-      ...this.state,
       player: {
         ...this.state.player,
         counter: newCounter
       }
     });
+  }
 
-    this.saveCount(newCounter);
+  onFocus() {
+    this.getData();
+    this.resumeAutosave();
   }
   
   onPressFire() {
     this.toast('You pressed The Fire!');
+  }
+
+  pauseAutosave() {
+    this.setState({
+      saving: false
+    });
+  }
+
+  resumeAutosave() {
+    this.setState({
+      saving: true
+    });
   }
 
   async save() {
@@ -209,7 +228,7 @@ export default class Home extends React.PureComponent {
     }
     return (
       <GameLoop style={{ height: '100%', width: '100%' }} onUpdate={this.updateHandler}>
-        <NavigationEvents onWillFocus={this.getData}/>
+        <NavigationEvents onWillBlur={this.onBlur} onWillFocus={this.onFocus}/>
         { content }
         <Toast ref="toast" position="bottom" positionValue={50}/>
       </GameLoop>

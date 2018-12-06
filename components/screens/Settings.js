@@ -63,13 +63,13 @@ export default class Settings extends React.Component {
     )
   }
 
-  confirmReset() {
+  async confirmReset() {
+    await this.resetProgress();
+
     this.setState({
       ...this.state,
       offerReset: false
     });
-
-    this.resetProgress();
   }
 
   getNextSaveTicks(current) {

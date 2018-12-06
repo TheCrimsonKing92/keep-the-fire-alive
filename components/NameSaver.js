@@ -1,5 +1,6 @@
 import React from 'react'
-import { Alert, AsyncStorage, Button, Text, TextInput, View } from 'react-native'
+import { Text, TextInput, View } from 'react-native'
+import MyButton from '../components/MyButton'
 
 export default class NameSaver extends React.Component {
   constructor(props) {
@@ -7,13 +8,15 @@ export default class NameSaver extends React.Component {
     this.state = {
       name: '',
       savedName: ''
-    }
+    };
+
+    this.saveName = this.saveName.bind(this);
   }
   displayName() {
     return (
       <View>
         <Text>Welcome, { this.props.name }</Text>
-        <Button title="Counter" onPress={this.props.onCounter}>Count</Button>
+        <MyButton onPress={this.props.onCounter} text={'Count'}/>
         <Text>{ this.props.count } Counted</Text>
       </View>
     )
@@ -23,9 +26,13 @@ export default class NameSaver extends React.Component {
       <View style={{ width: '100%' }}>
         <Text>Enter your name</Text>
         <TextInput placeholder="Name" onChangeText={ name => this.setState({name})}/>
-        <Button title="Save Name" onPress={e => this.props.onNameSaved(this.state.name)}>Save</Button>
+        <MyButton onPress={this.saveName} text={'Save'} />
       </View>
     )
+  }
+
+  saveName() {
+    this.props.onNameSaved(this.state.name);
   }
 
   render() {
