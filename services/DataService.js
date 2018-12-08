@@ -27,7 +27,7 @@ export const getData = async () => {
   try {
     const response = await getDataInternal();
     if (response === null) {
-      console.warn('Queried storage but no data to be found. Returning default.');
+      console.info('Queried storage but no data to be found. Returning default.');
       return DEFAULT_DATA;
     }
     return JSON.parse(response);
@@ -42,7 +42,7 @@ export const getPlayer = async () => {
   try {
     const data = await getData();
     if (!data.player) {
-      console.warn('Retrieved data but no player to be found. Returning default.');
+      console.info('Retrieved data but no player to be found. Returning default.');
       return DEFAULT_PLAYER;
     }
     return data.player;
@@ -57,7 +57,7 @@ export const getSettings = async () => {
   try {
     const data = await getData();
     if (!data.settings) {
-      console.warn('Retrieved data but no settings to be found. Returning default.');
+      console.info('Retrieved data but no settings to be found. Returning default.');
       return DEFAULT_SETTINGS;
     }
     return data.settings;
