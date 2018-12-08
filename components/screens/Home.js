@@ -250,10 +250,10 @@ export default class Home extends React.PureComponent {
     };
 
     DataService.setData(toSave)
-               .catch(e => {
-                 this.toast('Could not save data!');
-                 console.error('Could not save data with error: ' + e);
-               });
+                        .catch(e => {
+                          this.toast('Could not save data!');
+                          console.error('Could not save data with error: ' + e);
+                        });
   }
 
   toast(message) {
