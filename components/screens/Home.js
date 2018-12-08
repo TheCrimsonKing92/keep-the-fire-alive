@@ -1,11 +1,13 @@
 import React from 'react'
 import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
+
 import Toast from 'react-native-easy-toast'
 import { NavigationEvents } from 'react-navigation'
+
 import Banner from '../Banner';
+import { FPS } from '../../Constants';
 import CreateProfile from './CreateProfile'
 import DataService from '../../services/DataService'
-import GameLoop from '../GameLoop';
 import NameSaver from '../NameSaver'
 import TheFire from '../TheFire';
 
@@ -15,7 +17,9 @@ export default class Home extends React.PureComponent {
 
     this.state = this.getDefaultState();
 
+    this.evaluateFire = this.evaluateFire.bind(this);
     this.getData = this.getData.bind(this);
+    this.hurtFire = this.hurtFire.bind(this);
     this.loading = this.loading.bind(this);
     this.normal = this.normal.bind(this);
     this.onBlur = this.onBlur.bind(this);
@@ -28,6 +32,11 @@ export default class Home extends React.PureComponent {
   componentDidMount() {
     StatusBar.setHidden(true);
     this.getData();
+    this.handle = setInterval(this.updateHandler, 1000/FPS);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.handle);
   }
 
   createProfile() {
@@ -37,6 +46,24 @@ export default class Home extends React.PureComponent {
         <CreateProfile onNameSaved={this.onNameSaved} />
       </View>
     );
+  }
+
+  evaluateFire() {
+    const newTick = this.state.ticks.fire.current + 1;
+
+    this.setState({
+      ticks: {
+        ...this.state.ticks,
+        fire: {
+          ...this.state.ticks.fire,
+          current: newTick === this.state.ticks.fire.max ? 0 : newTick
+        }
+      }
+    });
+
+    if (newTick === this.state.ticks.fire.max) {
+      this.hurtFire();
+    }
   }
 
   evaluateSave() {
@@ -84,6 +111,7 @@ export default class Home extends React.PureComponent {
     return {
       lastTick: new Date(),
       loaded: false,
+      // TODO Deprecate reading save tick current value here
       saveTicks: 0,
       saving: true,
       player: {
@@ -92,10 +120,32 @@ export default class Home extends React.PureComponent {
         name: '',
         counter: 0
       },
+      // TODO Deprecate reading save tick max value here
       settings: {
         saveTicks: 600
+      },
+      ticks: {
+        fire: {
+          current: 0,
+          max: 300
+        },
+        save: {
+          current: 0,
+          max: 600
+        }
       }
     };
+  }
+
+  hurtFire() {
+    const fire = this.state.player.fire - 1;
+
+    this.setState({
+      player: {
+        ...this.state.player,
+        fire
+      }
+    });
   }
 
   async loadSave() {
@@ -124,6 +174,7 @@ export default class Home extends React.PureComponent {
             <NavigationEvents onWillFocus={() => this.getData()} />
             <Banner />
             <NameSaver count={this.state.player.counter} name={this.state.player.name} onCounter={this.onCounterPressed} onNameSaved={this.onNameSaved} />
+            <Text>Fire Health {this.state.player.fire}</Text>
             <Text style={styles.normalText}>Open up my diiiiiiiiiiiiiiiiick!</Text>
             <TheFire onPress={ this.onPressFire } />
           </View>;
@@ -160,6 +211,9 @@ export default class Home extends React.PureComponent {
   }
   
   onPressFire() {
+    this.setState({
+      
+    })
     this.toast('You pressed The Fire!');
   }
 
@@ -198,11 +252,12 @@ export default class Home extends React.PureComponent {
     this.refs.toast.show(message);
   }
 
-  updateHandler = ({ touches, screen, time }) => {
+  updateHandler = () => {
     this.setState({
       lastTick: new Date()
     });
     
+    this.evaluateFire();
     this.evaluateSave();
   };
 
@@ -216,11 +271,11 @@ export default class Home extends React.PureComponent {
       content = this.normal();
     }
     return (
-      <GameLoop style={{ height: '100%', width: '100%' }} onUpdate={this.updateHandler}>
+      <View style={{ height: '100%', width: '100%' }}>
         <NavigationEvents onWillBlur={this.onBlur} onWillFocus={this.onFocus}/>
         { content }
         <Toast ref="toast" position="bottom" positionValue={50}/>
-      </GameLoop>
+      </View>
     );
   }
 };
@@ -234,6 +289,6 @@ const styles = StyleSheet.create({
   },
   normalText: {
     flex: 1,
-    backgroundColor: 'purple'
+    backgroundColor: 'blue'
   }
 });
