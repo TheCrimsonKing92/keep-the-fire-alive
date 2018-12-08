@@ -99,10 +99,10 @@ export default class Settings extends React.Component {
     });
 
     try {
-      const settings = await DataService.getSettings();
+      const ticks = await DataService.getTicks();
       this.setState({
         loading: false,
-        saveTicks: settings.saveTicks
+        saveTicks: ticks.save.max
       });
     } catch (err) {
       this.toast('Unhandled error getting settings: ', err);
@@ -151,12 +151,8 @@ export default class Settings extends React.Component {
       saveTicks: next
     });
 
-    const newData = {
-      saveTicks: next
-    };
-
     try {
-      await DataService.setSettings(newData);
+      await DataService.setSaveFrequency(next);
       this.toast('Successfully updated save frequency');
     } catch (e) {
       this.toast('Could not save new frequency');

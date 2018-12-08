@@ -40,7 +40,7 @@ export default class Home extends React.Component {
       return true;
     }
 
-    if (this.state.player.fire !== nextState.player.fire) {
+    if (this.state.fire.current !== nextState.fire.current) {
       return true;
     }
 
@@ -87,13 +87,24 @@ export default class Home extends React.Component {
       return;
     }
 
-    const newTick = this.state.saveTicks + 1;
+    const save = this.state.ticks.save || {
+      current: 0,
+      max: 600
+    };
+    const newTick = save.current + 1;
+    const isSave = newTicks === save.max;
 
     this.setState({
-      saveTicks: newTick === this.state.settings.saveTicks ? 0 : newTick
+      ticks: {
+        ...this.state.ticks,
+        save: {
+          current: isSave ? 0 : newTick,
+          max: save.max
+        }
+      }
     });
 
-    if (newTick === this.state.settings.saveTicks) {
+    if (isSave) {
       this.save();
     }
   }
@@ -105,63 +116,50 @@ export default class Home extends React.Component {
 
     const data = await this.loadSave();
 
-    const { count, fire, name } = data.player;
-    const { saveTicks } = data.settings;
+    const player = {
+      ...data.player,
+      hasName: data.player.name !== null && data.player.name !== ''
+    };
+    const fire = data.fire;
+    const ticks = data.ticks;
 
     this.setState({
       ...this.state,
       loaded: true,
+      fire,
       player: {
-        fire,
-        hasName: name !== null && name !== '',
-        name,
-        counter: parseInt(count) || 0
+        ...player,
+        hasName: player.name !== null && player.name !== ''
       },
-      settings: {
-        saveTicks
+      ticks: {
+        ...this.state.ticks,
+        save: ticks.save
       }
-    });  
+    }); 
   }
 
   getDefaultState() {
     return {
+      ...DataService.getDefault(),
       fireDisabled: false,
       loaded: false,
-      // TODO Deprecate reading save tick current value here
-      saveTicks: 0,
       saving: true,
-      player: {
-        fire: 100,
-        hasName: false,
-        name: ''
-      },
-      // TODO Deprecate reading save tick max value here
-      settings: {
-        saveTicks: 600
-      },
-      ticks: {
-        fire: {
-          current: 0,
-          max: 100
-        },
-        save: {
-          current: 0,
-          max: 600
-        }
-      },
-      ui: {
-
-      }
+      ui: {}
     };
   }
 
   hurtFire() {
-    const fire = this.state.player.fire - 1;
+    console.info('Top level fire: ', this.state.fire);
+    const next = this.state.fire.current - 1;
 
     this.setState({
+      fire: {
+        ...this.state.fire,
+        current: next
+      },
       player: {
         ...this.state.player,
-        fire
+        fire: next
       }
     });
   }
@@ -192,7 +190,7 @@ export default class Home extends React.Component {
             <NavigationEvents onWillFocus={() => this.getData()} />
             <Banner />
             <Welcome name={this.state.player.name} />
-            <Text>Fire Health {this.state.player.fire}</Text>
+            <Text>Fire Health {this.state.fire.current}</Text>
             <TheFire onPress={ this.onPressFire } />
           </View>;
   }
@@ -217,15 +215,21 @@ export default class Home extends React.Component {
   }
   
   onPressFire() {
-    if (this.state.fireDisabled || this.state.player.fire >= FIRE_MAX_HEALTH) {
+    if (this.state.fireDisabled || this.state.fire.current >= FIRE_MAX_HEALTH) {
       return;
     }
 
+    const current = this.state.fire.current + 1;
+
     this.setState({
       fireDisabled: true,
+      fire: {
+        ...this.state.fire,
+        current
+      },
       player: {
         ...this.state.player,
-        fire: this.state.player.fire + 1
+        fire: current
       }
     });
 
@@ -236,7 +240,8 @@ export default class Home extends React.Component {
     }, FIRE_DELAY);
   }
 
-  pauseAutosave() {
+  async pauseAutosave() {
+    await this.save();
     this.setState({
       saving: false
     });
@@ -250,13 +255,13 @@ export default class Home extends React.Component {
 
   async save() {
     const toSave = {
+      fire: this.state.fire,
       player: {
-        count: this.state.player.counter,
-        fire: this.state.player.fire,
         name: this.state.player.name
       },
-      settings: {
-        saveTicks: this.state.settings.saveTicks
+      ticks: {
+        ...this.state.ticks,
+        save: this.state.ticks.save
       }
     };
 
