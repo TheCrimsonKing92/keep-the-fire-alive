@@ -5,13 +5,13 @@ import Toast from 'react-native-easy-toast'
 import { NavigationEvents } from 'react-navigation'
 
 import Banner from '../Banner';
-import { FPS } from '../../Constants';
+import { FIRE_MAX_HEALTH, FPS } from '../../Constants';
 import CreateProfile from './CreateProfile'
 import DataService from '../../services/DataService'
-import NameSaver from '../NameSaver'
+import Welcome from '../Welcome'
 import TheFire from '../TheFire';
 
-export default class Home extends React.PureComponent {
+export default class Home extends React.Component {
   constructor(props) {
     super(props);
 
@@ -33,6 +33,26 @@ export default class Home extends React.PureComponent {
     StatusBar.setHidden(true);
     this.getData();
     this.handle = setInterval(this.updateHandler, 1000/FPS);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (this.state.loaded !== nextState.loaded) {
+      return true;
+    }
+
+    if (this.state.player.fire !== nextState.player.fire) {
+      return true;
+    }
+
+    if (this.state.player.hasName !== nextState.player.hasName || this.state.playername !== nextState.player.name) {
+      return true;
+    }
+
+    if (this.state.player.counter !== nextState.player.counter) {
+      return true;
+    }
+
+    return false;
   }
 
   componentWillUnmount() {
@@ -115,10 +135,9 @@ export default class Home extends React.PureComponent {
       saveTicks: 0,
       saving: true,
       player: {
-        fire: 10,
+        fire: 100,
         hasName: false,
-        name: '',
-        counter: 0
+        name: ''
       },
       // TODO Deprecate reading save tick max value here
       settings: {
@@ -133,6 +152,9 @@ export default class Home extends React.PureComponent {
           current: 0,
           max: 600
         }
+      },
+      ui: {
+
       }
     };
   }
@@ -173,9 +195,8 @@ export default class Home extends React.PureComponent {
     return <View style={styles.container}>
             <NavigationEvents onWillFocus={() => this.getData()} />
             <Banner />
-            <NameSaver count={this.state.player.counter} name={this.state.player.name} onCounter={this.onCounterPressed} onNameSaved={this.onNameSaved} />
+            <Welcome name={this.state.player.name} />
             <Text>Fire Health {this.state.player.fire}</Text>
-            <Text style={styles.normalText}>Open up my diiiiiiiiiiiiiiiiick!</Text>
             <TheFire onPress={ this.onPressFire } />
           </View>;
   }
@@ -211,10 +232,16 @@ export default class Home extends React.PureComponent {
   }
   
   onPressFire() {
+    if (this.state.player.fire >= FIRE_MAX_HEALTH) {
+      return;
+    }
+
     this.setState({
-      
-    })
-    this.toast('You pressed The Fire!');
+      player: {
+        ...this.state.player,
+        fire: this.state.player.fire + 1
+      }
+    });
   }
 
   pauseAutosave() {
@@ -285,7 +312,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   normalText: {
     flex: 1,

@@ -2,8 +2,7 @@ import { AsyncStorage } from 'react-native'
 import { SAVE_KEY } from '../Constants';
 
 const DEFAULT_PLAYER = {
-  count: 0,
-  fire: 10,
+  fire: 100,
   hasName: false,
   name: ''
 };
