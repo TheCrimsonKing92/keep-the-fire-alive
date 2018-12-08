@@ -1,3 +1,4 @@
+export const FIRE_DELAY = 900;
 export const FIRE_MAX_HEALTH = 100;
 
 export const FPS = 60;

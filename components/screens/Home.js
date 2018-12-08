@@ -5,7 +5,7 @@ import Toast from 'react-native-easy-toast'
 import { NavigationEvents } from 'react-navigation'
 
 import Banner from '../Banner';
-import { FIRE_MAX_HEALTH, FPS } from '../../Constants';
+import { FIRE_DELAY, FIRE_MAX_HEALTH, FPS } from '../../Constants';
 import CreateProfile from './CreateProfile'
 import DataService from '../../services/DataService'
 import Welcome from '../Welcome'
@@ -17,13 +17,12 @@ export default class Home extends React.Component {
 
     this.state = this.getDefaultState();
 
-    this.evaluateFire = this.evaluateFire.bind(this);
+    this.evaluateFireHealth = this.evaluateFireHealth.bind(this);
     this.getData = this.getData.bind(this);
     this.hurtFire = this.hurtFire.bind(this);
     this.loading = this.loading.bind(this);
     this.normal = this.normal.bind(this);
     this.onBlur = this.onBlur.bind(this);
-    this.onCounterPressed = this.onCounterPressed.bind(this);
     this.onFocus = this.onFocus.bind(this);
     this.onNameSaved = this.onNameSaved.bind(this);
     this.onPressFire = this.onPressFire.bind(this);
@@ -33,6 +32,7 @@ export default class Home extends React.Component {
     StatusBar.setHidden(true);
     this.getData();
     this.handle = setInterval(this.updateHandler, 1000/FPS);
+    this.timeouts = [];
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -45,10 +45,6 @@ export default class Home extends React.Component {
     }
 
     if (this.state.player.hasName !== nextState.player.hasName || this.state.playername !== nextState.player.name) {
-      return true;
-    }
-
-    if (this.state.player.counter !== nextState.player.counter) {
       return true;
     }
 
@@ -68,7 +64,7 @@ export default class Home extends React.Component {
     );
   }
 
-  evaluateFire() {
+  evaluateFireHealth() {
     const newTick = this.state.ticks.fire.current + 1;
 
     this.setState({
@@ -129,7 +125,7 @@ export default class Home extends React.Component {
 
   getDefaultState() {
     return {
-      lastTick: new Date(),
+      fireDisabled: false,
       loaded: false,
       // TODO Deprecate reading save tick current value here
       saveTicks: 0,
@@ -146,7 +142,7 @@ export default class Home extends React.Component {
       ticks: {
         fire: {
           current: 0,
-          max: 300
+          max: 100
         },
         save: {
           current: 0,
@@ -215,33 +211,29 @@ export default class Home extends React.Component {
     }, this.save);
   }
 
-  onCounterPressed() {
-    const newCounter = this.state.player.counter + 1;
-
-    this.setState({
-      player: {
-        ...this.state.player,
-        counter: newCounter
-      }
-    });
-  }
-
   async onFocus() {
     await this.getData();
     this.resumeAutosave();
   }
   
   onPressFire() {
-    if (this.state.player.fire >= FIRE_MAX_HEALTH) {
+    if (this.state.fireDisabled || this.state.player.fire >= FIRE_MAX_HEALTH) {
       return;
     }
 
     this.setState({
+      fireDisabled: true,
       player: {
         ...this.state.player,
         fire: this.state.player.fire + 1
       }
     });
+
+    setTimeout(() => {
+      this.setState({
+        fireDisabled: false
+      });
+    }, FIRE_DELAY);
   }
 
   pauseAutosave() {
@@ -279,12 +271,8 @@ export default class Home extends React.Component {
     this.refs.toast.show(message);
   }
 
-  updateHandler = () => {
-    this.setState({
-      lastTick: new Date()
-    });
-    
-    this.evaluateFire();
+  updateHandler = () => {    
+    this.evaluateFireHealth();
     this.evaluateSave();
   };
 
