@@ -55,8 +55,8 @@ export default class Settings extends React.Component {
         <NavigationEvents onWillFocus={this.getSettings} />
         <Text>Profile will be reset</Text>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-          <MyButton containerStyle={{width: '40%'}} onPress={this.cancelReset} text={'Cancel'} />
-          <MyButton buttonStyle={{backgroundColor: 'red'}} containerStyle={{width: '40%'}} onPress={this.confirmReset} text={'Confirm'} />
+          <StyleableButton containerStyle={{width: '40%'}} onPress={this.cancelReset} text={'Cancel'} />
+          <StyleableButton buttonStyle={{backgroundColor: 'red'}} containerStyle={{width: '40%'}} onPress={this.confirmReset} text={'Confirm'} />
         </View>        
       </View>
     )
@@ -126,7 +126,7 @@ export default class Settings extends React.Component {
   }
 
   ProfileReset() {
-    return <MyButton containerStyle={{marginTop: 5}} onPress={this.offerReset} text={'Reset Profile'} />;
+    return <StyleableButton containerStyle={{marginTop: 5}} onPress={this.offerReset} text={'Reset Profile'} />;
   }
 
   async resetProgress() {
