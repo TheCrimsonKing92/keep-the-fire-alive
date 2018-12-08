@@ -69,6 +69,8 @@ export default class Settings extends React.Component {
       ...this.state,
       offerReset: false
     });
+
+    this.getSettings();
   }
 
   getNextSaveTicks(current) {
