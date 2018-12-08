@@ -1,7 +1,7 @@
 import React from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import Banner from '../../components/Banner'
-import MyButton from '../../components/MyButton'
+import StyleableButton from '../StyleableButton'
 import DataService from '../../services/DataService'
 import { NavigationEvents } from 'react-navigation'
 import Toast from 'react-native-easy-toast'
@@ -10,7 +10,7 @@ const AutoSave = (current, replace, disabled) => {
   const seconds = current / 60;
   const buttonTitle = 'Autosave Every ' + seconds + ' Seconds';
 
-  return <MyButton containerStyle={{marginTop: 5}} disabled={!!disabled} onPress={replace} text={buttonTitle}/>;
+  return <StyleableButton containerStyle={{marginTop: 5}} disabled={!!disabled} onPress={replace} text={buttonTitle}/>;
 }
 
 export default class Settings extends React.Component {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Platform, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
 
-export default class MyButton extends React.Component {
+export default class StyleableButton extends React.Component {
   constructor(props) {
     super(props);
 

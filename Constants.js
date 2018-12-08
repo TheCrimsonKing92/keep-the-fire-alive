@@ -1,4 +1,4 @@
-export const FIRE_MAX_HEALTH = 10;
+export const FIRE_MAX_HEALTH = 100;
 
 export const FPS = 60;
 
