@@ -11,7 +11,7 @@ import DataService from '../../services/DataService'
 import Welcome from '../Welcome'
 import TheFire from '../TheFire';
 
-export default class Home extends React.Component {
+export default class Home extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -32,23 +32,6 @@ export default class Home extends React.Component {
     StatusBar.setHidden(true);
     this.getData();
     this.handle = setInterval(this.updateHandler, 1000/FPS);
-    this.timeouts = [];
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    if (this.state.loaded !== nextState.loaded) {
-      return true;
-    }
-
-    if (this.state.fire.current !== nextState.fire.current) {
-      return true;
-    }
-
-    if (this.state.player.hasName !== nextState.player.hasName || this.state.playername !== nextState.player.name) {
-      return true;
-    }
-
-    return false;
   }
 
   componentWillUnmount() {
@@ -115,6 +98,7 @@ export default class Home extends React.Component {
     });
 
     const data = await this.loadSave();
+    console.info('Data: ', data);
 
     const player = {
       ...data.player,
@@ -276,7 +260,11 @@ export default class Home extends React.Component {
     this.refs.toast.show(message);
   }
 
-  updateHandler = () => {    
+  updateHandler = () => {
+    if (!this.state.player.hasName) {
+      return;
+    }
+
     this.evaluateFireHealth();
     this.evaluateSave();
   };
