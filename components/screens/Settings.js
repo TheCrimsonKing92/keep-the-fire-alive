@@ -1,6 +1,7 @@
 import React from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import Banner from '../../components/Banner'
+import Footer from '../../components/Footer'
 import StyleableButton from '../StyleableButton'
 import DataService from '../../services/DataService'
 import { NavigationEvents } from 'react-navigation'
@@ -178,7 +179,8 @@ export default class Settings extends React.Component {
           { !this.state.loading && AutoSave(this.state.saveTicks, this.updateSaveTicks, this.state.disabled.autosave)}
           { !this.state.loading && !this.state.offerReset && this.ProfileReset()}
           { !this.state.loading && this.state.offerReset && this.Confirm()}
-        </View>        
+        </View>
+        <Footer navigate={this.props.navigation.navigate} route={'Settings'} />        
         <Toast ref="toast" position="bottom" positionValue={50}/>
       </View>
     );

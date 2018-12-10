@@ -1,14 +1,44 @@
 import React from 'react'
-import { Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
+import StyleableButton from './StyleableButton'
+
+const routes = [
+  'Home', 'Settings', 'Skills', 'Stats'
+];
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 8,
+    width: '100%',
+  },
+  flexChild: {
+    flex: 1,
+    marginLeft: 3,
+    marginRight: 3
+  }
+});
+
+const FlexChild = ({route, onPress})  => {
+  return (
+    <StyleableButton containerStyle={styles.flexChild} onPress={onPress} text={route} />
+  )
+};
 
 export default class Footer extends React.PureComponent {
-  render() {
-    return (
-      <View style={{ alignItems: 'center', width: '100%'}}>
-        <Text style={{ textAlign: 'center', fontWeight: 'bold', width: '100%'}}>
-          Copyright © 2018
-        </Text>
-      </View>
-    )
+  constructor(props) {
+    super(props);
   }
-}
+
+  render() {
+    const current = routes.filter(r => r !== this.props.route)
+                                       .map((r, id) => <FlexChild key={id} route={r} onPress={() => this.props.navigate(r)}/>);
+    return (
+      <View style={styles.container}>
+        { current }
+      </View>
+    );
+  }
+};

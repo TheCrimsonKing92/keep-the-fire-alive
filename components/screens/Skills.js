@@ -1,5 +1,6 @@
-import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Footer from '../Footer';
 
 export default class Skills extends React.Component {
   constructor(props) {
@@ -10,6 +11,7 @@ export default class Skills extends React.Component {
     return (
       <View style={styles.container}>
         <Text>Skills</Text>
+        <Footer navigate={this.props.navigation.navigate} route={'Skills'} />
       </View>
     )
   }

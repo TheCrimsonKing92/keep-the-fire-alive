@@ -1,14 +1,15 @@
-import React from 'react'
+import React from 'react';
 import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
 
-import Toast from 'react-native-easy-toast'
-import { NavigationEvents } from 'react-navigation'
+import Toast from 'react-native-easy-toast';
+import { NavigationEvents } from 'react-navigation';
 
 import Banner from '../Banner';
 import { FIRE_DELAY, FIRE_MAX_HEALTH, FPS } from '../../Constants';
-import CreateProfile from './CreateProfile'
-import DataService from '../../services/DataService'
-import Welcome from '../Welcome'
+import CreateProfile from './CreateProfile';
+import Footer from '../Footer';
+import DataService from '../../services/DataService';
+import Welcome from '../Welcome';
 import TheFire from '../TheFire';
 
 export default class Home extends React.PureComponent {
@@ -70,12 +71,10 @@ export default class Home extends React.PureComponent {
       return;
     }
 
-    const save = this.state.ticks.save || {
-      current: 0,
-      max: 600
-    };
+    const save = this.state.ticks.save;
     const newTick = save.current + 1;
     const isSave = newTicks === save.max;
+    console.log('New tick: ', newTick, ' Max: ', save.max);
 
     this.setState({
       ticks: {
@@ -238,6 +237,7 @@ export default class Home extends React.PureComponent {
   }
 
   async save() {
+    console.info('Triggering a save');
     const toSave = {
       fire: this.state.fire,
       player: {
@@ -282,6 +282,7 @@ export default class Home extends React.PureComponent {
       <View style={{ height: '100%', width: '100%' }}>
         <NavigationEvents onWillBlur={this.onBlur} onWillFocus={this.onFocus}/>
         { content }
+        <Footer navigate={this.props.navigation.navigate} route={'Home'} />
         <Toast ref="toast" position="bottom" positionValue={50}/>
       </View>
     );
