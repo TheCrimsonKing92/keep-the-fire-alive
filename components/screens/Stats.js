@@ -16,6 +16,7 @@ export default class Stats extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#edc9af',
     alignItems: 'center',
     justifyContent: 'flex-start'
   }

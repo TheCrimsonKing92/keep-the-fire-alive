@@ -6,10 +6,11 @@ import { NavigationEvents } from 'react-navigation';
 
 import Banner from '../Banner';
 import { FIRE_DELAY, FIRE_MAX_HEALTH, FPS } from '../../Constants';
+import CoreStats from '../CoreStats'
 import CreateProfile from './CreateProfile';
 import Footer from '../Footer';
 import DataService from '../../services/DataService';
-import Welcome from '../Welcome';
+import TheDirt from '../TheDirt';
 import TheFire from '../TheFire';
 
 export default class Home extends React.PureComponent {
@@ -26,7 +27,9 @@ export default class Home extends React.PureComponent {
     this.onBlur = this.onBlur.bind(this);
     this.onFocus = this.onFocus.bind(this);
     this.onNameSaved = this.onNameSaved.bind(this);
+    this.onPressDirt = this.onPressDirt.bind(this);
     this.onPressFire = this.onPressFire.bind(this);
+    this.toast = this.toast.bind(this);
   }
 
   componentDidMount() {
@@ -124,6 +127,7 @@ export default class Home extends React.PureComponent {
   getDefaultState() {
     return {
       ...DataService.getDefault(),
+      dirtDisabled: false,
       fireDisabled: false,
       loaded: false,
       saving: true,
@@ -172,9 +176,9 @@ export default class Home extends React.PureComponent {
     return <View style={styles.container}>
             <NavigationEvents onWillFocus={() => this.getData()} />
             <Banner />
-            <Welcome name={this.state.player.name} />
-            <Text>Fire Health {this.state.fire.current}</Text>
-            <TheFire onPress={ this.onPressFire } />
+            <CoreStats fireHealth={this.state.fire.current} playerHealth = {10}/>
+            <TheFire onPress={this.onPressFire}/>
+            <TheDirt disabled={this.state.dirtDisabled} onPress={this.onPressDirt}/>
           </View>;
   }
 
@@ -195,6 +199,25 @@ export default class Home extends React.PureComponent {
   async onFocus() {
     await this.getData();
     this.resumeAutosave();
+  }
+
+  onPressDirt() {
+    if (this.state.dirtDisabled) {
+      return;
+    }
+
+    this.setState({
+      dirtDisabled: true
+    });
+    this.toast('You dig in the dirt...');
+
+    const message = Math.random() > 0.5 ? 'You find something useful!' : 'You find nothing...';
+    setTimeout(() => {
+      this.toast(message, 1000);
+      this.setState({
+        dirtDisabled: false
+      });
+    }, 4000);
   }
   
   onPressFire() {
@@ -292,7 +315,7 @@ export default class Home extends React.PureComponent {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#edc9af',
     alignItems: 'center',
     justifyContent: 'flex-start',
   },

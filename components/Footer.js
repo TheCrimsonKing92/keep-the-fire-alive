@@ -8,6 +8,7 @@ const routes = [
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#edc9af',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

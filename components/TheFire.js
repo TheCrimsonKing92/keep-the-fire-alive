@@ -48,7 +48,7 @@ export default class TheFire extends React.Component {
   render() {
     return (
       <TouchableWithoutFeedback onPress={this.props.onPress}>
-        <View style={{ backgroundColor: 'lightgreen' }}>
+        <View>
           <View style={styles.yellowLayer} />
           <View style={styles.orangeLayer} />
           <View style={styles.redLayer} />
