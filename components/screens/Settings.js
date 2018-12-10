@@ -8,8 +8,7 @@ import { NavigationEvents } from 'react-navigation'
 import Toast from 'react-native-easy-toast'
 
 const AutoSave = (current, replace, disabled) => {
-  const seconds = current / 60;
-  const buttonTitle = 'Autosave Every ' + seconds + ' Seconds';
+  const buttonTitle = 'Autosave Every ' + current + ' Seconds';
 
   return <StyleableButton buttonStyle={{backgroundColor: 'black'}} containerStyle={{marginTop: 5}} disabled={!!disabled} onPress={replace} text={buttonTitle}/>;
 }
@@ -77,15 +76,12 @@ export default class Settings extends React.Component {
     let next = current;
 
     switch (next) {
-      case 600:
-        next = 1800;
+      case 10:
+        next = 30;
         break;
-      case 1800:
-        next = 3600;
-        break;
-      case 3600:
+      case 60:
       default:
-        next = 600;
+        next = 10;
         break;
     }
 

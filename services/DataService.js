@@ -16,6 +16,10 @@ const DEFAULT_TICKS = {
     current: 0,
     max: 100
   },
+  freeze: {
+    current: 0,
+    max: 300
+  },
   save: {
     current: 0,
     max: 600

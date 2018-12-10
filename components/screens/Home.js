@@ -4,6 +4,7 @@ import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-nati
 import Toast from 'react-native-easy-toast';
 import { NavigationEvents } from 'react-navigation';
 
+import Autosave from '../Autosave';
 import Banner from '../Banner';
 import { DIRT_DELAY, FIRE_DELAY, FIRE_MAX_HEALTH, FIRE_MIN_HEALTH, FPS } from '../../Constants';
 import CoreStats from '../CoreStats'
@@ -77,30 +78,6 @@ export default class Home extends React.PureComponent {
     }
   }
 
-  evaluateSave() {
-    if (!this.state.player.hasName || !this.state.saving) {
-      return;
-    }
-
-    const save = this.state.ticks.save;
-    const newTick = save.current + 1;
-    const isSave = newTick === save.max;
-
-    this.setState({
-      ticks: {
-        ...this.state.ticks,
-        save: {
-          current: isSave ? 0 : newTick,
-          max: save.max
-        }
-      }
-    });
-
-    if (isSave) {
-      this.save();
-    }
-  }
-
   async getData() {
     this.setState({
       loaded: false
@@ -120,10 +97,7 @@ export default class Home extends React.PureComponent {
       ...this.state,
       loaded: true,
       fire,
-      player: {
-        ...player,
-        hasName: player.name !== null && player.name !== ''
-      },
+      player,
       ticks: {
         ...this.state.ticks,
         save: ticks.save
@@ -140,6 +114,16 @@ export default class Home extends React.PureComponent {
       saving: true,
       ui: {}
     };
+  }
+
+  getSaveData(state) {
+    return {
+      fire: state.fire,
+      player: {
+        name: state.player.name
+      },
+      ticks: state.ticks
+    }
   }
 
   hurtFire() {
@@ -180,6 +164,7 @@ export default class Home extends React.PureComponent {
 
   normal() {
     return <View style={styles.container}>
+            <Autosave data={this.state} saving={this.state.saving} saveTime={this.state.ticks.save.current} transform={this.getSaveData} />
             <Banner />
             <CoreStats fireHealth={this.state.fire.current} playerHealth = {10}/>
             <TheFire disabled={this.state.fireDisabled} onPress={this.onPressFire}/>
@@ -301,7 +286,6 @@ export default class Home extends React.PureComponent {
     }
 
     this.evaluateFireHealth();
-    this.evaluateSave();
   };
 
   render() {
