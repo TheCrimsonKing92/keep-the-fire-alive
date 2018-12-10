@@ -19,10 +19,18 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderLeftWidth: 0,
     borderTopWidth: 0,
-    borderRightWidth: 1,
+    borderRightWidth: 0,
     borderBottomWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 5,
-    paddingLeft: 5,
-    width: '50%'
+    padding: 8,
+    width: '100%',
+  },
+  flexChild: {
+    flex: 1,
+    marginLeft: 3,
+    marginRight: 3
   }
 });

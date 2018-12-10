@@ -5,11 +5,13 @@ import Toast from 'react-native-easy-toast';
 import { NavigationEvents } from 'react-navigation';
 
 import Banner from '../Banner';
-import { FIRE_DELAY, FIRE_MAX_HEALTH, FPS } from '../../Constants';
+import { DIRT_DELAY, FIRE_DELAY, FIRE_MAX_HEALTH, FIRE_MIN_HEALTH, FPS } from '../../Constants';
 import CoreStats from '../CoreStats'
 import CreateProfile from './CreateProfile';
 import Footer from '../Footer';
 import DataService from '../../services/DataService';
+import { DIRT_FAIL_MESSAGES, DIRT_START_MESSAGE, DIRT_SUCCESS_MESSAGES } from '../../Messages';
+import { selectRandom } from '../../Util';
 import TheDirt from '../TheDirt';
 import TheFire from '../TheFire';
 
@@ -29,6 +31,8 @@ export default class Home extends React.PureComponent {
     this.onNameSaved = this.onNameSaved.bind(this);
     this.onPressDirt = this.onPressDirt.bind(this);
     this.onPressFire = this.onPressFire.bind(this);
+    this.selectDirtFailMessage = this.selectDirtFailMessage.bind(this);
+    this.selectDirtSuccessMessage = this.selectDirtSuccessMessage.bind(this);
     this.toast = this.toast.bind(this);
   }
 
@@ -52,6 +56,10 @@ export default class Home extends React.PureComponent {
   }
 
   evaluateFireHealth() {
+    if (this.state.fire.current <= FIRE_MIN_HEALTH) {
+      return;
+    }
+
     const newTick = this.state.ticks.fire.current + 1;
 
     this.setState({
@@ -70,14 +78,13 @@ export default class Home extends React.PureComponent {
   }
 
   evaluateSave() {
-    if (!this.state.hasName) {
+    if (!this.state.player.hasName || !this.state.saving) {
       return;
     }
 
     const save = this.state.ticks.save;
     const newTick = save.current + 1;
-    const isSave = newTicks === save.max;
-    console.log('New tick: ', newTick, ' Max: ', save.max);
+    const isSave = newTick === save.max;
 
     this.setState({
       ticks: {
@@ -174,10 +181,9 @@ export default class Home extends React.PureComponent {
 
   normal() {
     return <View style={styles.container}>
-            <NavigationEvents onWillFocus={() => this.getData()} />
             <Banner />
             <CoreStats fireHealth={this.state.fire.current} playerHealth = {10}/>
-            <TheFire onPress={this.onPressFire}/>
+            <TheFire disabled={this.state.fireDisabled} onPress={this.onPressFire}/>
             <TheDirt disabled={this.state.dirtDisabled} onPress={this.onPressDirt}/>
           </View>;
   }
@@ -201,6 +207,14 @@ export default class Home extends React.PureComponent {
     this.resumeAutosave();
   }
 
+  selectDirtFailMessage() {
+    return selectRandom(DIRT_FAIL_MESSAGES);
+  }
+
+  selectDirtSuccessMessage() {
+    return selectRandom(DIRT_SUCCESS_MESSAGES);
+  }
+
   onPressDirt() {
     if (this.state.dirtDisabled) {
       return;
@@ -209,15 +223,15 @@ export default class Home extends React.PureComponent {
     this.setState({
       dirtDisabled: true
     });
-    this.toast('You dig in the dirt...');
+    this.toast(DIRT_START_MESSAGE);
 
-    const message = Math.random() > 0.5 ? 'You find something useful!' : 'You find nothing...';
+    const message = Math.random() > 0.5 ? this.selectDirtSuccessMessage() : this.selectDirtFailMessage();
     setTimeout(() => {
       this.toast(message, 1000);
       this.setState({
         dirtDisabled: false
       });
-    }, 4000);
+    }, DIRT_DELAY);
   }
   
   onPressFire() {

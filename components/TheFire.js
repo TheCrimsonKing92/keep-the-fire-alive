@@ -1,5 +1,5 @@
 import React from 'react'
-import { Stylesheet, TouchableWithoutFeedback, View } from 'react-native'
+import { Stylesheet, TouchableOpacity, View } from 'react-native'
 
 const LOG_COLOR = '#654321';
 
@@ -7,56 +7,61 @@ const styles = {
   logs: {
     first: {
       width: 90,
-      marginLeft: 17,
+      marginLeft: 10,
       height: 4,
       backgroundColor: LOG_COLOR
     },
     second: {
       width: 100,
-      marginLeft: 12,
+      marginLeft: 5,
       height: 4,
       backgroundColor: LOG_COLOR
     },
     third: {
       width: 110,
-      marginLeft: 7,
       height: 4,
       backgroundColor: LOG_COLOR
     }
   },
   orangeLayer: {
     width: 55,
-    marginLeft: 35,
+    marginLeft: 28,
     height: 6,
     backgroundColor: 'orange'
   },
   redLayer: {
     width: 75,
-    marginLeft: 25,
+    marginLeft: 18,
     height: 4,
     backgroundColor: 'red'
   },
   yellowLayer: {
     width: 35,
-    marginLeft: 45,
+    marginLeft: 38,
     height: 3,
     backgroundColor: 'yellow'
+  },
+  container: {
+    marginBottom: 5
+  },
+  disabled: {
+    opacity: 0.2
   }
 };
 
-export default class TheFire extends React.Component {
+export default class TheFire extends React.PureComponent {
   render() {
     return (
-      <TouchableWithoutFeedback onPress={this.props.onPress}>
-        <View>
+      <TouchableOpacity onPress={this.props.onPress}>
+        <View style={this.props.disabled ? [styles.container, styles.disabled] : [styles.container]}>
           <View style={styles.yellowLayer} />
           <View style={styles.orangeLayer} />
           <View style={styles.redLayer} />
           <View style={styles.logs.first} />
           <View style={styles.logs.second} />
           <View style={styles.logs.third} />
-        </View>        
-      </TouchableWithoutFeedback>
+        </View>    
+      </TouchableOpacity>
     )
   }
 };
