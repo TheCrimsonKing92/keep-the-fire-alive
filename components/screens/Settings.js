@@ -11,7 +11,7 @@ const AutoSave = (current, replace, disabled) => {
   const seconds = current / 60;
   const buttonTitle = 'Autosave Every ' + seconds + ' Seconds';
 
-  return <StyleableButton containerStyle={{marginTop: 5}} disabled={!!disabled} onPress={replace} text={buttonTitle}/>;
+  return <StyleableButton buttonStyle={{backgroundColor: 'black'}} containerStyle={{marginTop: 5}} disabled={!!disabled} onPress={replace} text={buttonTitle}/>;
 }
 
 export default class Settings extends React.Component {
@@ -53,11 +53,10 @@ export default class Settings extends React.Component {
   Confirm() {
     return (
       <View style={{flex: 1, marginTop: 5}}>
-        <NavigationEvents onWillFocus={this.getSettings} />
         <Text>Profile will be reset</Text>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-          <StyleableButton containerStyle={{width: '40%'}} onPress={this.cancelReset} text={'Cancel'} />
-          <StyleableButton buttonStyle={{backgroundColor: 'red'}} containerStyle={{width: '40%'}} onPress={this.confirmReset} text={'Confirm'} />
+        <View style={{  flexDirection: 'row', width: '100%'}}>
+          <StyleableButton buttonStyle={{backgroundColor: 'black'}} onPress={this.cancelReset} text={'Cancel'} />
+          <StyleableButton buttonStyle={{backgroundColor: 'red'}} containerStyle={{marginLeft: 5}} onPress={this.confirmReset} text={'Confirm'} />
         </View>        
       </View>
     )
@@ -127,7 +126,7 @@ export default class Settings extends React.Component {
   }
 
   ProfileReset() {
-    return <StyleableButton containerStyle={{marginTop: 5}} onPress={this.offerReset} text={'Reset Profile'} />;
+    return <StyleableButton buttonStyle={{backgroundColor: 'black'}} containerStyle={{marginTop: 5}} onPress={this.offerReset} text={'Reset Profile'} />;
   }
 
   async resetProgress() {

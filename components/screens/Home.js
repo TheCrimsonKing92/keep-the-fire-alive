@@ -143,7 +143,6 @@ export default class Home extends React.PureComponent {
   }
 
   hurtFire() {
-    console.info('Top level fire: ', this.state.fire);
     const next = this.state.fire.current - 1;
 
     this.setState({
@@ -274,7 +273,6 @@ export default class Home extends React.PureComponent {
   }
 
   async save() {
-    console.info('Triggering a save');
     const toSave = {
       fire: this.state.fire,
       player: {
@@ -316,7 +314,7 @@ export default class Home extends React.PureComponent {
       content = this.normal();
     }
     return (
-      <View style={{ height: '100%', width: '100%' }}>
+      <View style={styles.fullscreen}>
         <NavigationEvents onWillBlur={this.onBlur} onWillFocus={this.onFocus}/>
         { content }
         <Footer navigate={this.props.navigation.navigate} route={'Home'} />
@@ -332,6 +330,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#edc9af',
     alignItems: 'center',
     justifyContent: 'flex-start',
+  },
+  fullscreen: {
+    height: '100%',
+    width: '100%'
   },
   normalText: {
     flex: 1,

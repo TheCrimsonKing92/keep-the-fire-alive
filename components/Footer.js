@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
 
 const FlexChild = ({route, onPress})  => {
   return (
-    <StyleableButton containerStyle={styles.flexChild} onPress={onPress} text={route} />
+    <StyleableButton containerStyle={styles.flexChild} buttonStyle={{backgroundColor: 'black'}} onPress={onPress} text={route} />
   )
 };
 

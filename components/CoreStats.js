@@ -15,7 +15,6 @@ export default class CoreStats extends React.PureComponent {
 const styles = StyleSheet.create({
   container: {
     alignSelf: 'flex-start',
-    alignItems: 'flex-start',
     borderColor: 'black',
     borderLeftWidth: 0,
     borderTopWidth: 0,
