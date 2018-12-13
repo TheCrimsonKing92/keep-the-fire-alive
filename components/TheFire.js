@@ -52,7 +52,7 @@ const styles = {
 export default class TheFire extends React.PureComponent {
   render() {
     return (
-      <TouchableOpacity onPress={this.props.onPress}>
+      <TouchableOpacity disabled={this.props.disabled} onPress={this.props.onPress}>
         <View style={this.props.disabled ? [styles.container, styles.disabled] : [styles.container]}>
           <View style={styles.yellowLayer} />
           <View style={styles.orangeLayer} />

@@ -16,7 +16,7 @@ export default class TheDirt extends React.Component {
   render() {
     const currentStyles = this.props.disabled ? [styles.dirt, styles.disabled] : [styles.dirt];
     return (
-      <TouchableHighlight onPress={this.props.onPress}>
+      <TouchableHighlight disabled={this.props.disabled} onPress={this.props.onPress}>
         <View style={currentStyles}/>        
       </TouchableHighlight>
     )

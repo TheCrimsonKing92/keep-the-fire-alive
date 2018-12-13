@@ -6,7 +6,7 @@ import { NavigationEvents } from 'react-navigation';
 
 import Autosave from '../Autosave';
 import Banner from '../Banner';
-import { DIRT_DELAY, FIRE_DELAY, FIRE_MAX_HEALTH, FIRE_MIN_HEALTH, FPS } from '../../Constants';
+import { DIRT_DELAY, FIRE_DELAY, FIRE_MAX_HEALTH, FIRE_MIN_HEALTH, FPS, PROGRESS_TIME } from '../../Constants';
 import CoreStats from '../CoreStats'
 import CreateProfile from './CreateProfile';
 import Footer from '../Footer';
@@ -108,8 +108,16 @@ export default class Home extends React.PureComponent {
   getDefaultState() {
     return {
       ...DataService.getDefault(),
-      dirtDisabled: false,
-      fireDisabled: false,
+      dirtDisabled: {
+        now: false,
+        current: 0,
+        max: DIRT_DELAY / PROGRESS_TIME
+      },
+      fireDisabled: {
+        now: false,
+        current: 0,
+        max: FIRE_DELAY / PROGRESS_TIME
+      },
       loaded: false,
       saving: true,
       ui: {}
@@ -167,8 +175,8 @@ export default class Home extends React.PureComponent {
             <Autosave data={this.state} saving={this.state.saving} saveTime={this.state.ticks.save.current} transform={this.getSaveData} />
             <Banner />
             <CoreStats fireHealth={this.state.fire.current} playerHealth = {10}/>
-            <TheFire disabled={this.state.fireDisabled} onPress={this.onPressFire}/>
-            <TheDirt disabled={this.state.dirtDisabled} onPress={this.onPressDirt}/>
+            <TheFire disabled={this.state.fireDisabled.now} onPress={this.onPressFire}/>
+            <TheDirt disabled={this.state.dirtDisabled.now} onPress={this.onPressDirt}/>
           </View>;
   }
 
@@ -200,48 +208,89 @@ export default class Home extends React.PureComponent {
   }
 
   onPressDirt() {
-    if (this.state.dirtDisabled) {
+    if (this.state.dirtDisabled.now) {
       return;
     }
 
-    this.setState({
-      dirtDisabled: true
+    this.setState((previousState, props) => ({
+      dirtDisabled: {
+        current: 0,
+        max: previousState.dirtDisabled.max,
+        now: true
+      }
+    }), () => {
+      this.toast(DIRT_START_MESSAGE);
+      this.scheduleDirtEnableProgress(PROGRESS_TIME);
     });
-    this.toast(DIRT_START_MESSAGE);
-
-    const message = Math.random() > 0.5 ? this.selectDirtSuccessMessage() : this.selectDirtFailMessage();
-    setTimeout(() => {
-      this.toast(message, 1000);
-      this.setState({
-        dirtDisabled: false
-      });
-    }, DIRT_DELAY);
   }
   
   onPressFire() {
-    if (this.state.fireDisabled || this.state.fire.current >= FIRE_MAX_HEALTH) {
+    if (this.state.fireDisabled.now || this.state.fire.current >= FIRE_MAX_HEALTH) {
       return;
     }
 
     const current = this.state.fire.current + 1;
 
-    this.setState({
-      fireDisabled: true,
-      fire: {
-        ...this.state.fire,
-        current
+    // Disable the fire and kick off the progress timer
+    this.setState((previousState, props) => ({
+      fireDisabled: {
+        current: 0,
+        max: previousState.fireDisabled.max,
+        now: true
       },
-      player: {
-        ...this.state.player,
-        fire: current
+      fire: {
+        ...previousState.fire,
+        current
       }
-    });
+    }), () => this.scheduleFireEnableProgress(PROGRESS_TIME));
+  }
 
+  scheduleDirtEnableProgress(delay) {
     setTimeout(() => {
-      this.setState({
-        fireDisabled: false
-      });
-    }, FIRE_DELAY);
+      const current = this.state.dirtDisabled.current + 1;
+
+      if (current === this.state.dirtDisabled.max) {
+        this.setState((previousState, props) =>({
+          dirtDisabled: {
+            current,
+            max: previousState.dirtDisabled.max,
+            now: false
+          }
+        }), () => this.toast(Math.random() > 0.5 ? this.selectDirtSuccessMessage() : this.selectDirtFailMessage()));
+        return;
+      }
+
+      this.setState((previousState, props) => ({
+        dirtDisabled: {
+          ...previousState.dirtDisabled,
+          current
+        }
+      }), () => this.scheduleDirtEnableProgress(delay));
+    }, delay);
+  }
+
+  scheduleFireEnableProgress(delay) {
+    setTimeout(() => {
+      const current = this.state.fireDisabled.current + 1;
+
+      if (current === this.state.fireDisabled.max) {
+        this.setState((previousState, props) =>({
+          fireDisabled: {
+            current,
+            max: previousState.fireDisabled.max,
+            now: false
+          }
+        }));
+        return;
+      }
+
+      this.setState((previousState, props) => ({
+        fireDisabled: {
+          ...previousState.fireDisabled,
+          current
+        }
+      }), () => this.scheduleFireEnableProgress(delay));
+    }, delay);
   }
 
   async pauseAutosave() {

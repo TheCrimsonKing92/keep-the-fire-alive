@@ -5,6 +5,8 @@ export const FIRE_MIN_HEALTH = 0;
 
 export const FPS = 60;
 
+export const PROGRESS_TIME = 100;
+
 export const SAVE_KEY = '@keep-the-fire-alive/save';
 
 export default {
@@ -12,5 +14,6 @@ export default {
   FIRE_MAX_HEALTH,
   FIRE_MIN_HEALTH,
   FPS,
+  PROGRESS_TIME,
   SAVE_KEY
 };
