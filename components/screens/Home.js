@@ -7,6 +7,7 @@ import { NavigationEvents } from 'react-navigation';
 
 import Autosave from '../Autosave';
 import Banner from '../Banner';
+import { fullScreen } from '../../CommonStyles';
 import { DIRT_DELAY, FIRE_DELAY, FIRE_MAX_HEALTH, FIRE_MIN_HEALTH, FPS, PROGRESS_TIME } from '../../Constants';
 import CoreStats from '../CoreStats'
 import CreateProfile from './CreateProfile';
@@ -341,7 +342,7 @@ export default class Home extends React.PureComponent {
       content = this.normal();
     }
     return (
-      <View style={styles.fullscreen}>
+      <View style={styles.fullScreen}>
         <NavigationEvents onWillBlur={this.onBlur} onWillFocus={this.onFocus}/>
         { content }
         <Footer navigate={this.props.navigation.navigate} route={'Home'} />
@@ -362,14 +363,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 3
   },
-  fullscreen: {
-    height: '100%',
-    width: '100%'
-  },
-  normalText: {
-    flex: 1,
-    backgroundColor: 'blue'
-  },
+  fullScreen,
   row: {
     flexDirection: 'row'
   },

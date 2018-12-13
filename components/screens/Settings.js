@@ -4,10 +4,11 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { NavigationEvents } from 'react-navigation'
 import Toast from 'react-native-easy-toast'
 
-import Banner from '../../components/Banner'
-import DataService from '../../services/DataService'
-import Footer from '../../components/Footer'
-import StyleableButton from '../StyleableButton'
+import Banner from '../../components/Banner';
+import { container, title } from '../../CommonStyles';
+import DataService from '../../services/DataService';
+import Footer from '../../components/Footer';
+import StyleableButton from '../StyleableButton';
 
 const AutoSave = (current, replace, disabled) => {
   const buttonTitle = 'Autosave Every ' + current + ' Seconds';
@@ -170,7 +171,7 @@ export default class Settings extends React.Component {
       <View style={styles.container}>
         <NavigationEvents onWillFocus={this.getSettings}/>
         <Banner/>
-        <Text style={{alignSelf: 'center', fontSize: 20}}>Settings</Text>
+        <Text style={styles.title}>Settings</Text>
         <View style={{alignItems: 'flex-start', flex: 1, padding: 5}}>
           { this.state.loading && this.Loading() }
           { !this.state.loading && AutoSave(this.state.saveTicks, this.updateSaveTicks, this.state.disabled.autosave)}
@@ -185,8 +186,6 @@ export default class Settings extends React.Component {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#edc9af'
-  }
+  container,
+  title
 });

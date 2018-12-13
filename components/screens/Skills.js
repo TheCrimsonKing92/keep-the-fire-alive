@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import Banner from '../Banner';
 import Footer from '../Footer';
+import { container, title } from '../../CommonStyles';
 
 export default class Skills extends React.Component {
   constructor(props) {
@@ -22,12 +23,6 @@ export default class Skills extends React.Component {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#edc9af'
-  },
-  title: {
-    alignSelf: 'center',
-    fontSize: 20
-  }
+  container,
+  title
 });

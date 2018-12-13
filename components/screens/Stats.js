@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import Banner from '../Banner';
+import { container, title } from '../../CommonStyles';
 import Footer from '../Footer';
 
 export default class Stats extends React.Component {
@@ -18,12 +19,6 @@ export default class Stats extends React.Component {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#edc9af'
-  },
-  title: {
-    alignSelf: 'center',
-    fontSize: 20
-  }
+  container,
+  title
 });
