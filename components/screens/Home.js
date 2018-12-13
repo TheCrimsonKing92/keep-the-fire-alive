@@ -63,16 +63,15 @@ export default class Home extends React.PureComponent {
     }
 
     const newTick = this.state.ticks.fire.current + 1;
-
-    this.setState({
+    this.setState((previousState, props) => ({
       ticks: {
-        ...this.state.ticks,
+        ...previousState.ticks,
         fire: {
-          ...this.state.ticks.fire,
-          current: newTick === this.state.ticks.fire.max ? 0 : newTick
+          ...previousState.ticks.fire,
+          current: newTick === previousState.ticks.fire.max ? 0 : newTick
         }
       }
-    });
+    }));
 
     if (newTick === this.state.ticks.fire.max) {
       this.hurtFire();
@@ -85,7 +84,6 @@ export default class Home extends React.PureComponent {
     });
 
     const data = await this.loadSave();
-    console.info('Data: ', data);
 
     const player = {
       ...data.player,
@@ -94,16 +92,12 @@ export default class Home extends React.PureComponent {
     const fire = data.fire;
     const ticks = data.ticks;
 
-    this.setState({
-      ...this.state,
+    this.setState((previousState, props) => ({
       loaded: true,
       fire,
       player,
-      ticks: {
-        ...this.state.ticks,
-        save: ticks.save
-      }
-    }); 
+      ticks
+    }));
   }
 
   getDefaultState() {
@@ -138,16 +132,12 @@ export default class Home extends React.PureComponent {
   hurtFire() {
     const next = this.state.fire.current - 1;
 
-    this.setState({
+    this.setState((previousState, props) => ({
       fire: {
-        ...this.state.fire,
-        current: next
-      },
-      player: {
-        ...this.state.player,
-        fire: next
+        ...previousState.fire,
+        current: previousState.fire.current  - 1
       }
-    });
+    }));
   }
 
   async loadSave() {
@@ -198,13 +188,13 @@ export default class Home extends React.PureComponent {
   }
 
   async onNameSaved(name) {
-    this.setState({
+    this.setState((previousState, props) => ({
       player: {
-        ...this.state.player,
+        ...previousState.player,
         hasName: true,
-        name: name
+        name
       }
-    }, this.save);
+    }), this.save);
   }
 
   async onFocus() {

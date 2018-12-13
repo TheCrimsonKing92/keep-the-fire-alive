@@ -23,7 +23,7 @@ export default class Settings extends React.Component {
       },
       loading: false,
       offerReset: false,
-      saveTicks: 600
+      saveTicks: 0
     };
 
     this.cancelReset = this.cancelReset.bind(this);

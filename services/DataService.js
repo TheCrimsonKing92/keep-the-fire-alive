@@ -22,7 +22,7 @@ const DEFAULT_TICKS = {
   },
   save: {
     current: 0,
-    max: 600
+    max: 10
   }
 };
 
