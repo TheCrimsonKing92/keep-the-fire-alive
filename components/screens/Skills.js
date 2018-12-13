@@ -1,5 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+
+import Banner from '../Banner';
 import Footer from '../Footer';
 
 export default class Skills extends React.Component {
@@ -10,7 +12,9 @@ export default class Skills extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Skills</Text>
+        <Banner/>
+        <Text style={styles.title}>Skills</Text>
+        <View style={{flex: 1}}></View>
         <Footer navigate={this.props.navigation.navigate} route={'Skills'} />
       </View>
     )
@@ -20,16 +24,10 @@ export default class Skills extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#edc9af',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    backgroundColor: '#edc9af'
   },
-  blueBlock: {
-    flex: 1,
-    width: '100%',
-  },
-  normalText: {
-    flex: 1,
-    backgroundColor: 'purple'
+  title: {
+    alignSelf: 'center',
+    fontSize: 20
   }
 });
