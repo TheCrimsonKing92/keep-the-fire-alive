@@ -10,12 +10,12 @@ import Banner from '../Banner';
 import { DIRT_DELAY, FIRE_DELAY, FIRE_MAX_HEALTH, FIRE_MIN_HEALTH, FPS, PROGRESS_TIME } from '../../Constants';
 import CoreStats from '../CoreStats'
 import CreateProfile from './CreateProfile';
-import Footer from '../Footer';
 import DataService from '../../services/DataService';
+import Footer from '../Footer';
 import { DIRT_FAIL_MESSAGES, DIRT_START_MESSAGE, DIRT_SUCCESS_MESSAGES } from '../../Messages';
-import { randomBool, selectRandom } from '../../Util';
 import TheDirt from '../TheDirt';
 import TheFire from '../TheFire';
+import { randomBool, selectRandom } from '../../Util';
 
 export default class Home extends React.PureComponent {
   constructor(props) {

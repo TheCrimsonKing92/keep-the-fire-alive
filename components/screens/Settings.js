@@ -1,11 +1,13 @@
 import React from 'react'
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
-import Banner from '../../components/Banner'
-import Footer from '../../components/Footer'
-import StyleableButton from '../StyleableButton'
-import DataService from '../../services/DataService'
+
 import { NavigationEvents } from 'react-navigation'
 import Toast from 'react-native-easy-toast'
+
+import Banner from '../../components/Banner'
+import DataService from '../../services/DataService'
+import Footer from '../../components/Footer'
+import StyleableButton from '../StyleableButton'
 
 const AutoSave = (current, replace, disabled) => {
   const buttonTitle = 'Autosave Every ' + current + ' Seconds';
