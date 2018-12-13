@@ -42,7 +42,9 @@ const styles = {
     backgroundColor: 'yellow'
   },
   container: {
-    marginBottom: 5
+    marginBottom: 5,
+    marginLeft: 3,
+    marginRight: 3
   },
   disabled: {
     opacity: 0.2

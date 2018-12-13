@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
 
+import AnimatedBar from 'react-native-animated-bar';
 import Toast from 'react-native-easy-toast';
 import { NavigationEvents } from 'react-navigation';
 
@@ -110,12 +111,12 @@ export default class Home extends React.PureComponent {
       ...DataService.getDefault(),
       dirtDisabled: {
         now: false,
-        current: 0,
+        current: DIRT_DELAY / PROGRESS_TIME,
         max: DIRT_DELAY / PROGRESS_TIME
       },
       fireDisabled: {
         now: false,
-        current: 0,
+        current: FIRE_DELAY / PROGRESS_TIME,
         max: FIRE_DELAY / PROGRESS_TIME
       },
       loaded: false,
@@ -171,13 +172,26 @@ export default class Home extends React.PureComponent {
   }
 
   normal() {
-    return <View style={styles.container}>
-            <Autosave data={this.state} saving={this.state.saving} saveTime={this.state.ticks.save.current} transform={this.getSaveData} />
-            <Banner />
-            <CoreStats fireHealth={this.state.fire.current} playerHealth = {10}/>
-            <TheFire disabled={this.state.fireDisabled.now} onPress={this.onPressFire}/>
-            <TheDirt disabled={this.state.dirtDisabled.now} onPress={this.onPressDirt}/>
-          </View>;
+    return (
+      <View style={styles.container}>
+        <Autosave data={this.state} saving={this.state.saving} saveTime={this.state.ticks.save.current} transform={this.getSaveData} />
+        <Banner />
+        <CoreStats fireHealth={this.state.fire.current} playerHealth = {10}/>
+        <View style={styles.row}>
+          <TheFire disabled={this.state.fireDisabled.now} onPress={this.onPressFire}/>
+          <View style={styles.flexItem}>
+            <AnimatedBar duration={50} progress={this.state.fireDisabled.current / this.state.fireDisabled.max} />
+          </View>
+        </View>
+        <View style={styles.row}>
+            <TheDirt disabled={this.state.dirtDisabled.now} onPress={this.onPressDirt}/>    
+            <View style={[styles.flexItem, styles.verticalCenter]}>
+              <AnimatedBar duration={50} progress={this.state.dirtDisabled.current / this.state.dirtDisabled.max} />
+            </View>
+          </View>        
+      </View>
+    )
+    return ;
   }
 
   onBlur() {
@@ -364,6 +378,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
+  flexItem: {
+    flex: 1,
+    padding: 3
+  },
   fullscreen: {
     height: '100%',
     width: '100%'
@@ -371,5 +389,11 @@ const styles = StyleSheet.create({
   normalText: {
     flex: 1,
     backgroundColor: 'blue'
+  },
+  row: {
+    flexDirection: 'row'
+  },
+  verticalCenter: {
+    justifyContent: 'center'
   }
 });

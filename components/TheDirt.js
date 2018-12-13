@@ -5,7 +5,9 @@ const styles = StyleSheet.create({
   dirt: {
     backgroundColor: 'brown',
     height: 80,
-    width: 110
+    width: 110,
+    marginLeft: 3,
+    marginRight: 3
   },
   disabled: {
     opacity: 0.6
