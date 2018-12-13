@@ -13,7 +13,7 @@ import CreateProfile from './CreateProfile';
 import Footer from '../Footer';
 import DataService from '../../services/DataService';
 import { DIRT_FAIL_MESSAGES, DIRT_START_MESSAGE, DIRT_SUCCESS_MESSAGES } from '../../Messages';
-import { selectRandom } from '../../Util';
+import { randomBool, selectRandom } from '../../Util';
 import TheDirt from '../TheDirt';
 import TheFire from '../TheFire';
 
@@ -269,7 +269,7 @@ export default class Home extends React.PureComponent {
             max: previousState.dirtDisabled.max,
             now: false
           }
-        }), () => this.toast(Math.random() > 0.5 ? this.selectDirtSuccessMessage() : this.selectDirtFailMessage()));
+        }), () => this.toast(randomBool() ? this.selectDirtSuccessMessage() : this.selectDirtFailMessage()));
         return;
       }
 
