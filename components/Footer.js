@@ -7,6 +7,9 @@ const routes = [
 ];
 
 const styles = StyleSheet.create({
+  button: {
+    backgroundColor: 'black'
+  },
   container: {
     backgroundColor: '#edc9af',
     flexDirection: 'row',
@@ -24,7 +27,7 @@ const styles = StyleSheet.create({
 
 const FlexChild = ({route, onPress})  => {
   return (
-    <StyleableButton containerStyle={styles.flexChild} buttonStyle={{backgroundColor: 'black'}} onPress={onPress} text={route} />
+    <StyleableButton containerStyle={styles.flexChild} buttonStyle={styles.button} onPress={onPress} text={route} />
   )
 };
 
