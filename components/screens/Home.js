@@ -190,8 +190,7 @@ export default class Home extends React.PureComponent {
             </View>
           </View>        
       </View>
-    )
-    return ;
+    );
   }
 
   onBlur() {
