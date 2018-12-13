@@ -8,6 +8,10 @@ export const fullScreen = {
   width: '100%'
 };
 
+export const row = {
+  flexDirection: 'row'
+};
+
 export const title = {
   alignSelf: 'center',
   fontSize: 20

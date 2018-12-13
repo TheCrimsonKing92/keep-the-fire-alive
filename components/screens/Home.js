@@ -14,6 +14,7 @@ import CreateProfile from './CreateProfile';
 import DataService from '../../services/DataService';
 import Footer from '../Footer';
 import { DIRT_FAIL_MESSAGES, DIRT_START_MESSAGE, DIRT_SUCCESS_MESSAGES } from '../../Messages';
+import Row from '../Row';
 import TheDirt from '../TheDirt';
 import TheFire from '../TheFire';
 import { randomBool, selectRandom } from '../../Util';
@@ -168,18 +169,18 @@ export default class Home extends React.PureComponent {
         <Autosave data={this.state} saving={this.state.saving} saveTime={this.state.ticks.save.current} transform={this.getSaveData} />
         <Banner />
         <CoreStats fireHealth={this.state.fire.current} playerHealth = {10}/>
-        <View style={styles.row}>
+        <Row style={styles.row}>
           <TheFire disabled={this.state.fireDisabled.now} onPress={this.onPressFire}/>
-          <View style={styles.flexItem}>
+          <View style={[styles.flexItem, styles.verticalCenter]}>
             <AnimatedBar duration={50} progress={this.state.fireDisabled.current / this.state.fireDisabled.max} />
           </View>
-        </View>
-        <View style={styles.row}>
+        </Row>
+        <Row>
             <TheDirt disabled={this.state.dirtDisabled.now} onPress={this.onPressDirt}/>    
             <View style={[styles.flexItem, styles.verticalCenter]}>
               <AnimatedBar duration={50} progress={this.state.dirtDisabled.current / this.state.dirtDisabled.max} />
             </View>
-          </View>        
+          </Row>        
       </View>
     );
   }
