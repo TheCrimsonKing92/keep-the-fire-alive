@@ -321,16 +321,7 @@ export default class Home extends React.PureComponent {
   }
 
   async save() {
-    const toSave = {
-      fire: this.state.fire,
-      player: {
-        name: this.state.player.name
-      },
-      ticks: {
-        ...this.state.ticks,
-        save: this.state.ticks.save
-      }
-    };
+    const toSave = this.getSaveData(this.state);
 
     DataService.setData(toSave)
                         .catch(e => {
