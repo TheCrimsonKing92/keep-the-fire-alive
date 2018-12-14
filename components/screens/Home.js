@@ -49,7 +49,6 @@ export default class Home extends React.PureComponent {
     this.onPressDirt = this.onPressDirt.bind(this);
     this.onPressFire = this.onPressFire.bind(this);
     this.regenerateToast = this.regenerateToast.bind(this);
-    this.registerToast = this.registerToast.bind(this);
     this.selectDirtFailMessage = this.selectDirtFailMessage.bind(this);
     this.selectDirtSuccessMessage = this.selectDirtSuccessMessage.bind(this);
     this.showToast = this.showToast.bind(this);
@@ -69,6 +68,17 @@ export default class Home extends React.PureComponent {
 
   componentWillUnmount() {
     clearInterval(this.handle);
+  }
+
+  checkToastQueue() {
+    while (this.queue.length > 0 && !this.toastsConsumed()) {
+      this.showToast(this.queue.shift());
+    }
+  }
+
+  consumeToast(key, toast) {
+    this.toastTracking[key] = true;
+    this.refs[key].show(toast.message, toast.duration, () => this.regenerateToast(key));
   }
 
   createProfile() {
@@ -317,61 +327,9 @@ export default class Home extends React.PureComponent {
     });
   }
 
-  toastConsumed(key){
-    return this.toastTracking[key];
-  }
-
-  toastsConsumed() {
-    for (const key of toastKeys) {
-      if (!this.toastConsumed(key)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  checkToastQueue() {
-    while (this.queue.length > 0 && !this.toastsConsumed()) {
-      this.showToast(this.queue.shift());
-    }
-  }
-
-  registerToast(message, duration) {
-    if (this.toastsConsumed()) {
-      this.queue.push({
-        duration,
-        message
-      });
-      return;
-    }
-
-    this.showToast({
-      duration,
-      message
-    });
-  }
-
-  consumeToast(key, toast) {
-    this.toastTracking[key] = true;
-    this.refs[key].show(toast.message, toast.duration, () => this.regenerateToast(key));
-  }
-
   regenerateToast(key) {
     this.toastTracking[key] = false;
     this.checkToastQueue();
-  }
-
-  showToast(toast) {
-    for (const key of toastKeys) {
-      if (!this.toastConsumed(key)) {
-        this.consumeToast(key, toast);
-        return;
-      }
-    }
-
-    // None available
-    this.queue.unshift(toast);
   }
 
   resumeAutosave() {
@@ -390,14 +348,49 @@ export default class Home extends React.PureComponent {
                         });
   }
 
+  showToast(toast) {
+    for (const key of toastKeys) {
+      if (!this.toastConsumed(key)) {
+        this.consumeToast(key, toast);
+        return;
+      }
+    }
+
+    // None available
+    this.queue.unshift(toast);
+  }
+
   toast(message, duration = 1000) {
-    this.registerToast(message, duration);
+    if (this.toastsConsumed()) {
+      this.queue.push({
+        duration,
+        message
+      });
+      return;
+    }
+
+    this.showToast({
+      duration,
+      message
+    });
+  }
+
+  toastConsumed(key){
+    return this.toastTracking[key];
   }
 
   toasts() {
-    return (
-      toastKeys.map((key, index) => <Toast key={index} ref={key} position="bottom" positionValue={50 * (index + 1)}/>)
-    )
+    return toastKeys.map((key, index) => <Toast key={index} ref={key} position="bottom" positionValue={40 + (45 * index)}/>)
+  }
+
+  toastsConsumed() {
+    for (const key of toastKeys) {
+      if (!this.toastConsumed(key)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   updateHandler = () => {
