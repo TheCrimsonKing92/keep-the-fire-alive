@@ -1,7 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
 
-import AnimatedBar from 'react-native-animated-bar';
 import Toast from 'react-native-easy-toast';
 import { NavigationEvents } from 'react-navigation';
 
@@ -16,10 +15,20 @@ import DirtRow from '../DirtRow';
 import FireRow from '../FireRow';
 import Footer from '../Footer';
 import { DIRT_FAIL_MESSAGES, DIRT_START_MESSAGE, DIRT_SUCCESS_MESSAGES } from '../../Messages';
-import Row from '../Row';
-import TheDirt from '../TheDirt';
-import TheFire from '../TheFire';
 import { randomBool, selectRandom } from '../../Util';
+
+const toastKeys = [
+  'toast0',
+  'toast1',
+  'toast2',
+  'toast3',
+  'toast4',
+  'toast5',
+  'toast6',
+  'toast7',
+  'toast8',
+  'toast9'
+];
 
 export default class Home extends React.PureComponent {
   constructor(props) {
@@ -27,6 +36,8 @@ export default class Home extends React.PureComponent {
 
     this.state = this.getDefaultState();
 
+    this.checkToastQueue = this.checkToastQueue.bind(this);
+    this.consumeToast = this.consumeToast.bind(this);
     this.evaluateFireHealth = this.evaluateFireHealth.bind(this);
     this.getData = this.getData.bind(this);
     this.hurtFire = this.hurtFire.bind(this);
@@ -37,15 +48,23 @@ export default class Home extends React.PureComponent {
     this.onNameSaved = this.onNameSaved.bind(this);
     this.onPressDirt = this.onPressDirt.bind(this);
     this.onPressFire = this.onPressFire.bind(this);
+    this.regenerateToast = this.regenerateToast.bind(this);
+    this.registerToast = this.registerToast.bind(this);
     this.selectDirtFailMessage = this.selectDirtFailMessage.bind(this);
     this.selectDirtSuccessMessage = this.selectDirtSuccessMessage.bind(this);
+    this.showToast = this.showToast.bind(this);
     this.toast = this.toast.bind(this);
+    this.toastConsumed = this.toastConsumed.bind(this);
+    this.toasts = this.toasts.bind(this);
+    this.toastsConsumed = this.toastsConsumed.bind(this);
   }
 
   componentDidMount() {
     StatusBar.setHidden(true);
     this.getData();
     this.handle = setInterval(this.updateHandler, 1000/FPS);
+    this.queue = [];
+    this.toastTracking = toastKeys.reduce((ob, curr) => ({...ob, [curr]: false}), {});
   }
 
   componentWillUnmount() {
@@ -228,6 +247,7 @@ export default class Home extends React.PureComponent {
 
     const current = this.state.fire.current + 1;
 
+    this.toast('You touched the fire!');
     // Disable the fire and kick off the progress timer
     this.setState((previousState, props) => ({
       fireDisabled: {
@@ -297,6 +317,63 @@ export default class Home extends React.PureComponent {
     });
   }
 
+  toastConsumed(key){
+    return this.toastTracking[key];
+  }
+
+  toastsConsumed() {
+    for (const key of toastKeys) {
+      if (!this.toastConsumed(key)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  checkToastQueue() {
+    while (this.queue.length > 0 && !this.toastsConsumed()) {
+      this.showToast(this.queue.shift());
+    }
+  }
+
+  registerToast(message, duration) {
+    if (this.toastsConsumed()) {
+      this.queue.push({
+        duration,
+        message
+      });
+      return;
+    }
+
+    this.showToast({
+      duration,
+      message
+    });
+  }
+
+  consumeToast(key, toast) {
+    this.toastTracking[key] = true;
+    this.refs[key].show(toast.message, toast.duration, () => this.regenerateToast(key));
+  }
+
+  regenerateToast(key) {
+    this.toastTracking[key] = false;
+    this.checkToastQueue();
+  }
+
+  showToast(toast) {
+    for (const key of toastKeys) {
+      if (!this.toastConsumed(key)) {
+        this.consumeToast(key, toast);
+        return;
+      }
+    }
+
+    // None available
+    this.queue.unshift(toast);
+  }
+
   resumeAutosave() {
     this.setState({
       saving: true
@@ -313,8 +390,14 @@ export default class Home extends React.PureComponent {
                         });
   }
 
-  toast(message, duration) {
-    this.refs.toast.show(message, duration);
+  toast(message, duration = 1000) {
+    this.registerToast(message, duration);
+  }
+
+  toasts() {
+    return (
+      toastKeys.map((key, index) => <Toast key={index} ref={key} position="bottom" positionValue={50 * (index + 1)}/>)
+    )
   }
 
   updateHandler = () => {
@@ -340,6 +423,7 @@ export default class Home extends React.PureComponent {
         { content }
         <Footer navigate={this.props.navigation.navigate} route={'Home'} />
         <Toast ref="toast" position="bottom" positionValue={50}/>
+        { this.toasts() }
       </View>
     );
   }
