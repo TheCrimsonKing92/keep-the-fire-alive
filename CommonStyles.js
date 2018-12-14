@@ -3,6 +3,11 @@ export const container = {
   backgroundColor: '#edc9af'
 };
 
+export const flexItem = {
+  flex: 1,
+  padding: 3
+};
+
 export const fullScreen = {
   height: '100%',
   width: '100%'
@@ -15,4 +20,8 @@ export const row = {
 export const title = {
   alignSelf: 'center',
   fontSize: 20
+};
+
+export const verticalCenter = {
+  justifyContent: 'center'
 };

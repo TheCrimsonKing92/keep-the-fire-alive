@@ -7,11 +7,13 @@ import { NavigationEvents } from 'react-navigation';
 
 import Autosave from '../Autosave';
 import Banner from '../Banner';
-import { fullScreen } from '../../CommonStyles';
+import { flexItem, fullScreen, row, verticalCenter } from '../../CommonStyles';
 import { DIRT_DELAY, FIRE_DELAY, FIRE_MAX_HEALTH, FIRE_MIN_HEALTH, FPS, PROGRESS_TIME } from '../../Constants';
 import CoreStats from '../CoreStats'
 import CreateProfile from './CreateProfile';
 import DataService from '../../services/DataService';
+import DirtRow from '../DirtRow';
+import FireRow from '../FireRow';
 import Footer from '../Footer';
 import { DIRT_FAIL_MESSAGES, DIRT_START_MESSAGE, DIRT_SUCCESS_MESSAGES } from '../../Messages';
 import Row from '../Row';
@@ -169,18 +171,8 @@ export default class Home extends React.PureComponent {
         <Autosave data={this.state} saving={this.state.saving} saveTime={this.state.ticks.save.current} transform={this.getSaveData} />
         <Banner />
         <CoreStats fireHealth={this.state.fire.current} playerHealth = {10}/>
-        <Row style={styles.row}>
-          <TheFire disabled={this.state.fireDisabled.now} onPress={this.onPressFire}/>
-          <View style={[styles.flexItem, styles.verticalCenter]}>
-            <AnimatedBar duration={50} progress={this.state.fireDisabled.current / this.state.fireDisabled.max} />
-          </View>
-        </Row>
-        <Row>
-            <TheDirt disabled={this.state.dirtDisabled.now} onPress={this.onPressDirt}/>    
-            <View style={[styles.flexItem, styles.verticalCenter]}>
-              <AnimatedBar duration={50} progress={this.state.dirtDisabled.current / this.state.dirtDisabled.max} />
-            </View>
-          </Row>        
+        <FireRow fireDisabled={this.state.fireDisabled.now} fireProgress={this.state.fireDisabled.current / this.state.fireDisabled.max} onPressFire={this.onPressFire} />
+        <DirtRow disabled={this.state.dirtDisabled.now} progress={this.state.dirtDisabled.current / this.state.dirtDisabled.max} onPressDirt={this.onPressDirt}/>
       </View>
     );
   }
@@ -224,7 +216,7 @@ export default class Home extends React.PureComponent {
         now: true
       }
     }), () => {
-      this.toast(DIRT_START_MESSAGE);
+      this.toast(DIRT_START_MESSAGE, DIRT_DELAY * (3/4));
       this.scheduleDirtEnableProgress(PROGRESS_TIME);
     });
   }
@@ -261,7 +253,7 @@ export default class Home extends React.PureComponent {
             max: previousState.dirtDisabled.max,
             now: false
           }
-        }), () => this.toast(randomBool() ? this.selectDirtSuccessMessage() : this.selectDirtFailMessage()));
+        }), () => this.toast(randomBool() ? this.selectDirtSuccessMessage() : this.selectDirtFailMessage(), 500));
         return;
       }
 
@@ -321,8 +313,8 @@ export default class Home extends React.PureComponent {
                         });
   }
 
-  toast(message) {
-    this.refs.toast.show(message);
+  toast(message, duration) {
+    this.refs.toast.show(message, duration);
   }
 
   updateHandler = () => {
@@ -360,15 +352,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
-  flexItem: {
-    flex: 1,
-    padding: 3
-  },
+  flexItem,
   fullScreen,
-  row: {
-    flexDirection: 'row'
-  },
-  verticalCenter: {
-    justifyContent: 'center'
-  }
+  row,
+  verticalCenter
 });
