@@ -257,7 +257,6 @@ export default class Home extends React.PureComponent {
 
     const current = this.state.fire.current + 1;
 
-    this.toast('You touched the fire!');
     // Disable the fire and kick off the progress timer
     this.setState((previousState, props) => ({
       fireDisabled: {
