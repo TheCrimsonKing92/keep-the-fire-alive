@@ -7,7 +7,7 @@ import { NavigationEvents } from 'react-navigation';
 import Autosave from '../Autosave';
 import Banner from '../Banner';
 import { flexItem, fullScreen, row, verticalCenter } from '../../CommonStyles';
-import { DIRT_DELAY, FIRE_DELAY, FIRE_MAX_HEALTH, FIRE_MIN_HEALTH, FPS, PROGRESS_TIME } from '../../Constants';
+import { DIRT_DELAY, FIRE_DELAY, FIRE_MAX_HEALTH, FIRE_MIN_HEALTH, FPS, PROGRESS_TIME, TEMPERATURE_THRESHOLD } from '../../Constants';
 import CoreStats from '../CoreStats'
 import CreateProfile from './CreateProfile';
 import DataService from '../../services/DataService';
@@ -16,6 +16,7 @@ import FireRow from '../FireRow';
 import Footer from '../Footer';
 import { DIRT_FAIL_MESSAGES, DIRT_START_MESSAGE, DIRT_SUCCESS_MESSAGES } from '../../Messages';
 import { randomBool, selectRandom } from '../../Util';
+import AnimatedBar from 'react-native-animated-bar';
 
 const toastKeys = [
   'toast0',
@@ -111,6 +112,83 @@ export default class Home extends React.PureComponent {
     }
   }
 
+  evaluateFreeze() {
+    if (this.state.fire.current < TEMPERATURE_THRESHOLD.CHILLED) {
+      const next = this.state.ticks.freeze.current + 2;
+
+      if (next >= this.state.ticks.freeze.max) {
+        this.setState((previousState, props) => ({
+          player: {
+            ...previousState.player,
+            health: {
+              max: previousState.player.health.max,
+              current: previousState.player.health.current - 1
+            }
+          },
+          ticks: {
+            ...previousState.ticks,
+            freeze: {
+              current: 0,
+              max: previousState.ticks.freeze.max
+            }
+          }
+        }));
+      } else {
+        this.setState((previousState, props) => ({
+          ticks: {
+            ...previousState.ticks,
+            freeze: {
+              current: next,
+              max: previousState.ticks.freeze.max
+            }
+          }
+        }));
+      }
+    }
+
+    if (this.state.fire.current < TEMPERATURE_THRESHOLD.THAWED) {
+      const next = this.state.ticks.freeze.current + 1;
+
+      if (next >= this.state.ticks.freeze.max) {
+        this.setState((previousState, props) => ({
+          player: {
+            ...previousState.player,
+            health: {
+              max: previousState.player.health.max,
+              current: previousState.player.health.current - 1
+            }
+          },
+          ticks: {
+            ...previousState.ticks,
+            freeze: {
+              current: 0,
+              max: previousState.ticks.freeze.max
+            }
+          }
+        }));
+      } else {
+        this.setState((previousState, props) => ({
+          ticks: {
+            ...previousState.ticks,
+            freeze: {
+              current: next,
+              max: previousState.ticks.freeze.max
+            }
+          }
+        }));
+      }
+    }
+  }
+
+  freeze() {
+    this.setState((previousState, props) => ({
+      player: {
+        ...previousState.player,
+        health: previousState.health - 1
+      }
+    }));
+  }
+
   async getData() {
     this.setState({
       loaded: false
@@ -156,6 +234,7 @@ export default class Home extends React.PureComponent {
     return {
       fire: state.fire,
       player: {
+        health: state.player.health,
         name: state.player.name
       },
       ticks: state.ticks
@@ -163,8 +242,6 @@ export default class Home extends React.PureComponent {
   }
 
   hurtFire() {
-    const next = this.state.fire.current - 1;
-
     this.setState((previousState, props) => ({
       fire: {
         ...previousState.fire,
@@ -199,7 +276,14 @@ export default class Home extends React.PureComponent {
       <View style={styles.container}>
         <Autosave data={this.state} saving={this.state.saving} saveTime={this.state.ticks.save.current} transform={this.getSaveData} />
         <Banner />
-        <CoreStats fireHealth={this.state.fire.current} playerHealth = {10}/>
+        <CoreStats fireHealth={this.state.fire.current} playerHealth = {this.state.player.health.current}/>
+        <Row>
+          { this.state.fire.current < TEMPERATURE_THRESHOLD.THAWED && <Text style={{color: 'blue'}}>Freezing!</Text> }
+          { this.state.fire.current >= TEMPERATURE_THRESHOLD.THAWED && <Text style={{color: 'orange'}}>Warm...</Text>}
+          <View style={{flex: 1}}>
+            <AnimatedBar duration={50} progress={this.state.ticks.freeze.current / this.state.ticks.freeze.max} />
+          </View>          
+        </Row>
         <FireRow fireDisabled={this.state.fireDisabled.now} fireProgress={this.state.fireDisabled.current / this.state.fireDisabled.max} onPressFire={this.onPressFire} />
         <DirtRow disabled={this.state.dirtDisabled.now} progress={this.state.dirtDisabled.current / this.state.dirtDisabled.max} onPressDirt={this.onPressDirt}/>
       </View>
@@ -398,6 +482,7 @@ export default class Home extends React.PureComponent {
     }
 
     this.evaluateFireHealth();
+    this.evaluateFreeze();
   };
 
   render() {

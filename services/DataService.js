@@ -1,5 +1,5 @@
 import { AsyncStorage } from 'react-native'
-import { FIRE_MAX_HEALTH, SAVE_KEY } from '../Constants';
+import { FIRE_MAX_HEALTH, PLAYER_MAX_HEALTH, SAVE_KEY } from '../Constants';
 
 const DEFAULT_FIRE = {
   current: FIRE_MAX_HEALTH,
@@ -8,6 +8,10 @@ const DEFAULT_FIRE = {
 
 const DEFAULT_PLAYER = {
   hasName: false,
+  health: {
+    current: PLAYER_MAX_HEALTH,
+    max: PLAYER_MAX_HEALTH
+  },
   name: ''
 };
 
