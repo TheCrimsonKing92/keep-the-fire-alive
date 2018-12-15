@@ -1,10 +1,10 @@
-export const DIRT_DELAY = 3000;
-export const FIRE_DELAY = 900;
+export const DIRT_DELAY = 6000;
+export const FIRE_DELAY = 1600;
 export const FIRE_MAX_HEALTH = 100;
 export const FIRE_MIN_HEALTH = 0;
 export const FPS = 60;
 export const PLAYER_MAX_HEALTH = 10;
-export const PROGRESS_TIME = 100;
+export const PROGRESS_TIME = 200;
 export const SAVE_KEY = '@keep-the-fire-alive/save';
 export const TEMPERATURE_THRESHOLD = {
   FREEZING: FIRE_MIN_HEALTH,

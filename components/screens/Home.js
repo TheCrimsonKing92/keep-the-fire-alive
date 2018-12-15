@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
 
-import Toast from 'react-native-easy-toast';
+import Toast from '../Toast';
 import { NavigationEvents } from 'react-navigation';
 
 import Autosave from '../Autosave';
@@ -15,6 +15,7 @@ import DirtRow from '../DirtRow';
 import FireRow from '../FireRow';
 import Footer from '../Footer';
 import { DIRT_FAIL_MESSAGES, DIRT_START_MESSAGE, DIRT_SUCCESS_MESSAGES } from '../../Messages';
+import Title from '../Title';
 import { randomBool, selectRandom } from '../../Util';
 import AnimatedBar from 'react-native-animated-bar';
 
@@ -37,8 +38,10 @@ export default class Home extends React.PureComponent {
 
     this.state = this.getDefaultState();
 
+    this.advanceDirt = this.advanceDirt.bind(this);
     this.checkToastQueue = this.checkToastQueue.bind(this);
     this.consumeToast = this.consumeToast.bind(this);
+    this.disableDirt = this.disableDirt.bind(this);
     this.evaluateFireHealth = this.evaluateFireHealth.bind(this);
     this.getData = this.getData.bind(this);
     this.hurtFire = this.hurtFire.bind(this);
@@ -53,6 +56,7 @@ export default class Home extends React.PureComponent {
     this.selectDirtFailMessage = this.selectDirtFailMessage.bind(this);
     this.selectDirtSuccessMessage = this.selectDirtSuccessMessage.bind(this);
     this.showToast = this.showToast.bind(this);
+    this.startDirtEnableProgress = this.startDirtEnableProgress.bind(this);
     this.toast = this.toast.bind(this);
     this.toastConsumed = this.toastConsumed.bind(this);
     this.toasts = this.toasts.bind(this);
@@ -69,6 +73,46 @@ export default class Home extends React.PureComponent {
 
   componentWillUnmount() {
     clearInterval(this.handle);
+  }
+
+  componentDidUpdate(previousProps, previousState) {
+    if (!previousState.player.hasName && this.state.player.hasName) {
+      this.save();
+    }
+
+    if (previousState.ticks.fire.current !== this.state.ticks.fire.current && this.state.ticks.fire.current === this.state.ticks.fire.max) {
+      this.hurtFire();
+    }
+
+    if (previousState.fire.current !== this.state.fire.current) {
+      this.evaluateHypothermia(previousState.fire.current, this.state.fire.current);
+    }
+
+    if (previousState.fireDisabled.now === false && this.state.fireDisabled.now === true) {
+      this.scheduleFireEnableProgress(PROGRESS_TIME - 10);
+    }
+
+    if (previousState.dirtDisabled.now === true && this.state.dirtDisabled.now === false) {
+      clearInterval(this.dirtProgress);
+      this.toast(randomBool() ? this.selectDirtSuccessMessage() : this.selectDirtFailMessage(), DIRT_DELAY);
+    } else if (!previousState.dirtDisabled.now && this.state.dirtDisabled.now) {
+      this.toast(DIRT_START_MESSAGE, DIRT_DELAY);
+      this.startDirtEnableProgress();
+    }
+  }
+
+  advanceDirt() {
+    this.setState((previousState, props) => {
+      const current = previousState.dirtDisabled.current + 1;
+      const max = previousState.dirtDisabled.max;
+      return {
+        dirtDisabled: {
+          current,
+          max,
+          now: !(current === max)
+        }
+      }
+    });
   }
 
   checkToastQueue() {
@@ -91,25 +135,34 @@ export default class Home extends React.PureComponent {
     );
   }
 
+  disableDirt() {
+    this.setState((previousState, props) => ({
+      dirtDisabled: {
+        current: 0,
+        max: previousState.dirtDisabled.max,
+        now: true
+      }
+    }));
+  }
+
   evaluateFireHealth() {
     if (this.state.fire.current <= FIRE_MIN_HEALTH) {
       return;
     }
 
-    const newTick = this.state.ticks.fire.current + 1;
+    const previous = this.state.ticks.fire.current;
+
+    const current = previous === this.state.ticks.fire.max ? 0 : previous + 1;
+
     this.setState((previousState, props) => ({
       ticks: {
         ...previousState.ticks,
         fire: {
           ...previousState.ticks.fire,
-          current: newTick === previousState.ticks.fire.max ? 0 : newTick
+          current
         }
       }
     }));
-
-    if (newTick === this.state.ticks.fire.max) {
-      this.hurtFire();
-    }
   }
 
   evaluateFreeze() {
@@ -133,6 +186,7 @@ export default class Home extends React.PureComponent {
             }
           }
         }));
+        return;
       } else {
         this.setState((previousState, props) => ({
           ticks: {
@@ -143,6 +197,7 @@ export default class Home extends React.PureComponent {
             }
           }
         }));
+        return;
       }
     }
 
@@ -177,6 +232,16 @@ export default class Home extends React.PureComponent {
           }
         }));
       }
+    }
+  }
+
+  evaluateHypothermia(previous, current) {
+    if (previous < TEMPERATURE_THRESHOLD.WARM && current >= TEMPERATURE_THRESHOLD.WARM) {
+      this.toast('Hypothermia abates...');
+    } else if (previous >= TEMPERATURE_THRESHOLD.WARM && current < TEMPERATURE_THRESHOLD.WARM) {
+      this.toast('Hypothermia sets in...');
+    } else {
+      return;
     }
   }
 
@@ -242,6 +307,7 @@ export default class Home extends React.PureComponent {
   }
 
   hurtFire() {
+    const previous = this.state.fire.current;
     this.setState((previousState, props) => ({
       fire: {
         ...previousState.fire,
@@ -278,10 +344,11 @@ export default class Home extends React.PureComponent {
         <Banner />
         <CoreStats fireHealth={this.state.fire.current} playerHealth = {this.state.player.health.current}/>
         <Row>
-          { this.state.fire.current < TEMPERATURE_THRESHOLD.THAWED && <Text style={{color: 'blue'}}>Freezing!</Text> }
-          { this.state.fire.current >= TEMPERATURE_THRESHOLD.THAWED && <Text style={{color: 'orange'}}>Warm...</Text>}
-          <View style={{flex: 1}}>
-            <AnimatedBar duration={50} progress={this.state.ticks.freeze.current / this.state.ticks.freeze.max} />
+          <View style={{alignItems: 'center', marginBottom: 5, width: 116}}>
+            <Title style={{color: 'blue', fontSize: 18}} text={'Hypothermia'}/>
+          </View>
+          <View style={[styles.flexItem, styles.verticalCenter]}>
+            <AnimatedBar duration={5} progress={this.state.ticks.freeze.current / this.state.ticks.freeze.max} />
           </View>          
         </Row>
         <FireRow fireDisabled={this.state.fireDisabled.now} fireProgress={this.state.fireDisabled.current / this.state.fireDisabled.max} onPressFire={this.onPressFire} />
@@ -301,7 +368,7 @@ export default class Home extends React.PureComponent {
         hasName: true,
         name
       }
-    }), this.save);
+    }));
   }
 
   async onFocus() {
@@ -322,16 +389,7 @@ export default class Home extends React.PureComponent {
       return;
     }
 
-    this.setState((previousState, props) => ({
-      dirtDisabled: {
-        current: 0,
-        max: previousState.dirtDisabled.max,
-        now: true
-      }
-    }), () => {
-      this.toast(DIRT_START_MESSAGE, DIRT_DELAY * (3/4));
-      this.scheduleDirtEnableProgress(PROGRESS_TIME);
-    });
+    this.disableDirt();
   }
   
   onPressFire() {
@@ -352,34 +410,15 @@ export default class Home extends React.PureComponent {
         ...previousState.fire,
         current
       }
-    }), () => this.scheduleFireEnableProgress(PROGRESS_TIME));
+    }));
   }
 
-  scheduleDirtEnableProgress(delay) {
-    setTimeout(() => {
-      const current = this.state.dirtDisabled.current + 1;
-
-      if (current === this.state.dirtDisabled.max) {
-        this.setState((previousState, props) =>({
-          dirtDisabled: {
-            current,
-            max: previousState.dirtDisabled.max,
-            now: false
-          }
-        }), () => this.toast(randomBool() ? this.selectDirtSuccessMessage() : this.selectDirtFailMessage(), 500));
-        return;
-      }
-
-      this.setState((previousState, props) => ({
-        dirtDisabled: {
-          ...previousState.dirtDisabled,
-          current
-        }
-      }), () => this.scheduleDirtEnableProgress(delay));
-    }, delay);
+  startDirtEnableProgress() {
+    this.dirtProgress = setInterval(this.advanceDirt, PROGRESS_TIME);
   }
 
   scheduleFireEnableProgress(delay) {
+
     setTimeout(() => {
       const current = this.state.fireDisabled.current + 1;
 

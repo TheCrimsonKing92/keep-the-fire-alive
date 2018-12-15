@@ -16,7 +16,7 @@ export default class FireRow extends React.PureComponent {
       <Row>
         <TheFire disabled={this.props.fireDisabled} onPress={this.props.onPressFire}/>
           <View style={[styles.flexItem, styles.verticalCenter]}>
-            <AnimatedBar duration={50} progress={this.props.fireProgress} />
+            <AnimatedBar duration={150} progress={this.props.fireProgress} />
           </View>
       </Row>
     )

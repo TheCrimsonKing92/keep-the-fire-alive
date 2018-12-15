@@ -16,7 +16,7 @@ export default class DirtRow extends React.PureComponent {
       <Row>
         <TheDirt disabled={this.props.disabled} onPress={this.props.onPressDirt}/>    
         <View style={[styles.flexItem, styles.verticalCenter]}>
-          <AnimatedBar duration={50} progress={this.props.progress} />
+          <AnimatedBar duration={150} progress={this.props.progress} />
         </View>
       </Row>
     )
