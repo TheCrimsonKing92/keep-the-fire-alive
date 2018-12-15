@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import AnimatedBar from 'react-native-animated-bar';
 
-import { flexItem, row, verticalCenter } from '../CommonStyles';
+import { flexItem, verticalCenter } from '../CommonStyles';
 import Row from './Row';
 import TheDirt from './TheDirt';
 
@@ -25,6 +25,5 @@ export default class DirtRow extends React.PureComponent {
 
 const styles = StyleSheet.create({
   flexItem,
-  row,
   verticalCenter
 });
